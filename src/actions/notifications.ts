@@ -18,7 +18,6 @@ export async function createNotification({
   await prisma.adminNotification.create({
     data: { type, title, message, link },
   })
-  revalidatePath("/admin")
 }
 
 export async function getUnreadNotificationCount(): Promise<number> {
