@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <pattern id="dna-tile" x="0" y="0" width="400" height="400" patternUnits="userSpaceOnUse">
+      <!-- DNA strand 1 -->
+      <path d="M50,0 Q100,50 50,100 Q0,150 50,200 Q100,250 50,300 Q0,350 50,400" fill="none" stroke="#60A5FA" stroke-width="2" opacity="0.7"/>
+      <path d="M90,0 Q40,50 90,100 Q140,150 90,200 Q40,250 90,300 Q140,350 90,400" fill="none" stroke="#60A5FA" stroke-width="2" opacity="0.7"/>
+      <!-- Rungs strand 1 -->
+      <line x1="50" y1="25" x2="90" y2="25" stroke="#93C5FD" stroke-width="1.5" opacity="0.6"/>
+      <line x1="30" y1="75" x2="110" y2="75" stroke="#93C5FD" stroke-width="1.5" opacity="0.6"/>
+      <line x1="50" y1="125" x2="90" y2="125" stroke="#93C5FD" stroke-width="1.5" opacity="0.6"/>
+      <line x1="30" y1="175" x2="110" y2="175" stroke="#93C5FD" stroke-width="1.5" opacity="0.6"/>
+      <line x1="50" y1="225" x2="90" y2="225" stroke="#93C5FD" stroke-width="1.5" opacity="0.6"/>
+      <line x1="30" y1="275" x2="110" y2="275" stroke="#93C5FD" stroke-width="1.5" opacity="0.6"/>
+      <line x1="50" y1="325" x2="90" y2="325" stroke="#93C5FD" stroke-width="1.5" opacity="0.6"/>
+      <line x1="30" y1="375" x2="110" y2="375" stroke="#93C5FD" stroke-width="1.5" opacity="0.6"/>
+
+      <!-- DNA strand 2 -->
+      <path d="M250,0 Q300,50 250,100 Q200,150 250,200 Q300,250 250,300 Q200,350 250,400" fill="none" stroke="#38BDF8" stroke-width="2" opacity="0.6"/>
+      <path d="M290,0 Q240,50 290,100 Q340,150 290,200 Q240,250 290,300 Q340,350 290,400" fill="none" stroke="#38BDF8" stroke-width="2" opacity="0.6"/>
+      <!-- Rungs strand 2 -->
+      <line x1="250" y1="25" x2="290" y2="25" stroke="#7DD3FC" stroke-width="1.5" opacity="0.5"/>
+      <line x1="230" y1="75" x2="310" y2="75" stroke="#7DD3FC" stroke-width="1.5" opacity="0.5"/>
+      <line x1="250" y1="125" x2="290" y2="125" stroke="#7DD3FC" stroke-width="1.5" opacity="0.5"/>
+      <line x1="230" y1="175" x2="310" y2="175" stroke="#7DD3FC" stroke-width="1.5" opacity="0.5"/>
+      <line x1="250" y1="225" x2="290" y2="225" stroke="#7DD3FC" stroke-width="1.5" opacity="0.5"/>
+      <line x1="230" y1="275" x2="310" y2="275" stroke="#7DD3FC" stroke-width="1.5" opacity="0.5"/>
+      <line x1="250" y1="325" x2="290" y2="325" stroke="#7DD3FC" stroke-width="1.5" opacity="0.5"/>
+      <line x1="230" y1="375" x2="310" y2="375" stroke="#7DD3FC" stroke-width="1.5" opacity="0.5"/>
+
+      <!-- Molecular polylines -->
+      <polyline points="150,30 170,60 155,90 180,120 160,150" fill="none" stroke="#60A5FA" stroke-width="1.2" opacity="0.45"/>
+      <circle cx="150" cy="30" r="3.5" fill="#60A5FA" opacity="0.5"/>
+      <circle cx="170" cy="60" r="3" fill="#93C5FD" opacity="0.5"/>
+      <circle cx="155" cy="90" r="4" fill="#60A5FA" opacity="0.45"/>
+      <circle cx="180" cy="120" r="3" fill="#93C5FD" opacity="0.5"/>
+      <circle cx="160" cy="150" r="3.5" fill="#60A5FA" opacity="0.45"/>
+
+      <polyline points="340,180 360,200 345,235 370,260 355,290 375,320" fill="none" stroke="#38BDF8" stroke-width="1.2" opacity="0.45"/>
+      <circle cx="340" cy="180" r="3" fill="#38BDF8" opacity="0.5"/>
+      <circle cx="360" cy="200" r="4" fill="#7DD3FC" opacity="0.45"/>
+      <circle cx="345" cy="235" r="3" fill="#38BDF8" opacity="0.5"/>
+      <circle cx="370" cy="260" r="3.5" fill="#7DD3FC" opacity="0.45"/>
+      <circle cx="355" cy="290" r="3" fill="#38BDF8" opacity="0.5"/>
+      <circle cx="375" cy="320" r="3.5" fill="#7DD3FC" opacity="0.45"/>
+
+      <!-- Hexagonal molecule structures -->
+      <polygon points="180,250 195,240 210,250 210,270 195,280 180,270" fill="none" stroke="#60A5FA" stroke-width="1.2" opacity="0.4"/>
+      <line x1="210" y1="250" x2="225" y2="240" stroke="#60A5FA" stroke-width="1" opacity="0.35"/>
+      <circle cx="225" cy="240" r="3" fill="#93C5FD" opacity="0.4"/>
+      <line x1="210" y1="270" x2="225" y2="280" stroke="#60A5FA" stroke-width="1" opacity="0.35"/>
+      <circle cx="225" cy="280" r="3" fill="#93C5FD" opacity="0.4"/>
+      <line x1="180" y1="250" x2="165" y2="240" stroke="#60A5FA" stroke-width="1" opacity="0.35"/>
+      <circle cx="165" cy="240" r="3" fill="#93C5FD" opacity="0.4"/>
+
+      <polygon points="320,60 335,50 350,60 350,80 335,90 320,80" fill="none" stroke="#38BDF8" stroke-width="1.2" opacity="0.4"/>
+      <line x1="350" y1="60" x2="365" y2="50" stroke="#38BDF8" stroke-width="1" opacity="0.35"/>
+      <circle cx="365" cy="50" r="3" fill="#7DD3FC" opacity="0.4"/>
+      <line x1="320" y1="80" x2="305" y2="90" stroke="#38BDF8" stroke-width="1" opacity="0.35"/>
+      <circle cx="305" cy="90" r="3" fill="#7DD3FC" opacity="0.4"/>
+
+      <!-- Scattered dots (atoms) -->
+      <circle cx="130" cy="340" r="2.5" fill="#60A5FA" opacity="0.4"/>
+      <circle cx="200" cy="370" r="2" fill="#93C5FD" opacity="0.45"/>
+      <circle cx="310" cy="140" r="2.5" fill="#38BDF8" opacity="0.4"/>
+      <circle cx="380" cy="350" r="2" fill="#7DD3FC" opacity="0.4"/>
+      <circle cx="120" cy="200" r="2" fill="#60A5FA" opacity="0.35"/>
+      <circle cx="370" cy="110" r="2.5" fill="#38BDF8" opacity="0.35"/>
+      <circle cx="200" cy="180" r="2" fill="#93C5FD" opacity="0.4"/>
+      <circle cx="150" cy="390" r="2.5" fill="#60A5FA" opacity="0.35"/>
+
+      <!-- Dashed orbital lines -->
+      <circle cx="170" cy="330" r="22" fill="none" stroke="#93C5FD" stroke-width="1" stroke-dasharray="4,5" opacity="0.35"/>
+      <circle cx="350" cy="370" r="17" fill="none" stroke="#7DD3FC" stroke-width="1" stroke-dasharray="3,4" opacity="0.35"/>
+    </pattern>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#dna-tile)"/>
+</svg>
