@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation"
 import { auth } from "@/auth"
 import { getCart } from "@/actions/cart"
-import { initCheckoutReservation } from "@/actions/checkout"
 import { cookies } from "next/headers"
 import { getSettings } from "@/lib/settings"
 import { sanitizeHtml } from "@/lib/sanitize"
@@ -12,7 +11,10 @@ export const metadata = { title: "Checkout" }
 export default async function CheckoutPage() {
   const session = await auth()
 
-  const settings = await getSettings(["shipping_flat_rate", "tax_rate", "enable_guest_checkout", "enable_paypal", "enable_venmo", "enable_cashapp", "enable_bitcoin", "terms_of_service_content", "store_name"])
+  const [cart, settings] = await Promise.all([
+    getCart(),
+    getSettings(["shipping_flat_rate", "tax_rate", "enable_guest_checkout", "enable_paypal", "enable_venmo", "enable_cashapp", "enable_bitcoin", "terms_of_service_content", "store_name"]),
+  ])
 
   const guestCheckoutEnabled = settings.enable_guest_checkout !== "false"
 
@@ -20,12 +22,6 @@ export default async function CheckoutPage() {
   if (!session?.user && !guestCheckoutEnabled) {
     redirect("/login?returnUrl=/checkout")
   }
-
-  // Initialize reservation for master-linked items (may adjust cart quantities)
-  const reservation = await initCheckoutReservation()
-
-  // Read cart after reservation (reflects any quantity adjustments)
-  const cart = await getCart()
   if (!cart || cart.items.length === 0) redirect("/cart")
 
   // Read affiliate cookie to auto-apply
@@ -70,8 +66,6 @@ export default async function CheckoutPage() {
           isGuest={isGuest}
           enabledPaymentMethods={enabledPaymentMethods}
           termsContent={termsContent}
-          reservationExpiresAt={reservation.hasReservation ? reservation.expiresAt : null}
-          stockAdjustments={reservation.hasReservation ? reservation.adjustments : []}
         />
       </div>
     </div>

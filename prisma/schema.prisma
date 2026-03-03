@@ -241,6 +241,7 @@ model Product {
   wishlistItems  WishlistItem[]
   reviews        ProductReview[]
   masterSkuLinks MasterSkuLink[]
+  stackItems     StackItem[]
 
   @@index([slug])
   @@index([isActive, isFeatured])
@@ -299,6 +300,43 @@ model ProductImage {
 
   @@index([productId])
   @@map("product_images")
+}
+
+// ============================================================
+// STACKS (Product Bundles)
+// ============================================================
+
+model Stack {
+  id          String      @id @default(cuid())
+  name        String
+  slug        String      @unique
+  description String?     @db.Text
+  image       String?
+  isActive    Boolean     @default(true)
+  sortOrder   Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  items StackItem[]
+
+  @@index([slug])
+  @@index([isActive])
+  @@map("stacks")
+}
+
+model StackItem {
+  id        String @id @default(cuid())
+  stackId   String
+  productId String
+  sortOrder Int    @default(0)
+
+  stack   Stack   @relation(fields: [stackId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([stackId, productId])
+  @@index([stackId])
+  @@index([productId])
+  @@map("stack_items")
 }
 
 // ============================================================

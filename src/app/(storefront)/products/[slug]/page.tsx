@@ -10,6 +10,7 @@ import { WishlistButton } from "@/components/storefront/wishlist-button"
 import { ProductReviews } from "@/components/storefront/product-reviews"
 import { ProductDetails } from "./product-details"
 import { SocialShare } from "@/components/storefront/social-share"
+import { ProductStacks } from "./product-stacks"
 import { JsonLd } from "@/components/storefront/json-ld"
 import type { Metadata } from "next"
 
@@ -254,6 +255,9 @@ export default async function ProductPage({ params }: Props) {
           </div>
         </div>
       </div>
+
+      {/* Stacks containing this product */}
+      <ProductStacks productId={product.id} />
 
       {/* Reviews */}
       {reviewsEnabled && (

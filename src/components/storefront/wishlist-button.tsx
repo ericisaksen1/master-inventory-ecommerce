@@ -47,7 +47,7 @@ export function WishlistButton({ productId, isWishlisted: initial, size = "sm" }
       aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
     >
       <svg
-        className={`${iconSize} ${wishlisted ? "fill-red-500 text-red-500" : "fill-none text-foreground"}`}
+        className={`${iconSize} ${wishlisted ? "fill-[#00ff41] text-[#00ff41]" : "fill-none text-foreground"}`}
         viewBox="0 0 24 24"
         stroke="currentColor"
         strokeWidth={2}

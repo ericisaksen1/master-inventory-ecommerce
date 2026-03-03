@@ -32,6 +32,7 @@ const navSections: NavSection[] = [
       { href: "/admin/orders", label: "Orders", icon: "shopping-cart" },
       { href: "/admin/customers", label: "Customers", icon: "users" },
       { href: "/admin/affiliates", label: "Affiliates", icon: "link", requiresAffiliates: true },
+      { href: "/admin/stacks", label: "Stacks", icon: "layers" },
       { href: "/admin/coupons", label: "Coupons", icon: "ticket" },
       { href: "/admin/returns", label: "Returns", icon: "return" },
     ],
@@ -160,6 +161,11 @@ const icons: Record<string, React.ReactNode> = {
   clock: (
     <svg className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  ),
+  layers: (
+    <svg className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L12 12.75 6.429 9.75m11.142 0l4.179 2.25-9.75 5.25-9.75-5.25 4.179-2.25" />
     </svg>
   ),
   pencil: (

@@ -7,38 +7,34 @@ import { revalidatePath } from "next/cache"
 
 const GUEST_CART_COOKIE = "guest_cart_session"
 
+const cartInclude = {
+  items: {
+    include: {
+      product: { include: { images: { where: { isPrimary: true }, take: 1 } } },
+      variant: true,
+    },
+  },
+} as const
+
 async function getOrCreateCart() {
   const session = await auth()
 
   if (session?.user?.id) {
-    // Logged-in user: find or create user cart
-    let cart = await prisma.cart.findUnique({
-      where: { userId: session.user.id },
-      include: {
-        items: {
-          include: {
-            product: { include: { images: { where: { isPrimary: true }, take: 1 } } },
-            variant: true,
-          },
-        },
-      },
-    })
-
-    if (!cart) {
-      cart = await prisma.cart.create({
-        data: { userId: session.user.id },
-        include: {
-          items: {
-            include: {
-              product: { include: { images: { where: { isPrimary: true }, take: 1 } } },
-              variant: true,
-            },
-          },
-        },
+    try {
+      return await prisma.cart.upsert({
+        where: { userId: session.user.id },
+        create: { userId: session.user.id },
+        update: {},
+        include: cartInclude,
       })
+    } catch (e: unknown) {
+      // P2003 = FK constraint — user was deleted but session is stale; fall through to guest cart
+      if (e && typeof e === "object" && "code" in e && e.code === "P2003") {
+        // fall through to guest cart below
+      } else {
+        throw e
+      }
     }
-
-    return cart
   }
 
   // Guest user: use session cookie
@@ -56,33 +52,12 @@ async function getOrCreateCart() {
     })
   }
 
-  let cart = await prisma.cart.findUnique({
+  return prisma.cart.upsert({
     where: { sessionId },
-    include: {
-      items: {
-        include: {
-          product: { include: { images: { where: { isPrimary: true }, take: 1 } } },
-          variant: true,
-        },
-      },
-    },
+    create: { sessionId },
+    update: {},
+    include: cartInclude,
   })
-
-  if (!cart) {
-    cart = await prisma.cart.create({
-      data: { sessionId },
-      include: {
-        items: {
-          include: {
-            product: { include: { images: { where: { isPrimary: true }, take: 1 } } },
-            variant: true,
-          },
-        },
-      },
-    })
-  }
-
-  return cart
 }
 
 export async function getCart() {

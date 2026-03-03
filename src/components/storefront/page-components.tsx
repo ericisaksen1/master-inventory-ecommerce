@@ -23,6 +23,7 @@ import { FaqAccordion } from "./faq-accordion"
 import { SpacerDivider } from "./spacer-divider"
 import { MarqueeBanner } from "./marquee-banner"
 import { ProductListing } from "./product-listing"
+import { StacksGrid } from "./stacks-grid"
 import type { ComponentColorProps } from "@/lib/component-colors"
 
 function extractColors(s: Record<string, any>): ComponentColorProps {
@@ -516,6 +517,86 @@ export async function PageComponents({ pageId }: PageComponentsProps) {
                 headlineColor={colors.headlineColor}
               />
             </div>
+          )
+        }
+
+        case "stacks_grid": {
+          const stacks = await prisma.stack.findMany({
+            where: { isActive: true },
+            include: {
+              items: {
+                include: {
+                  product: {
+                    select: {
+                      id: true,
+                      name: true,
+                      basePrice: true,
+                      stock: true,
+                      isActive: true,
+                      images: { where: { isPrimary: true }, take: 1 },
+                    },
+                  },
+                },
+                orderBy: { sortOrder: "asc" },
+              },
+            },
+            orderBy: { sortOrder: "asc" },
+            take: settings.maxStacks || 8,
+          })
+
+          // Check master inventory for all products in stacks
+          const allProductIds: string[] = []
+          for (const stack of stacks) {
+            for (const item of stack.items) {
+              allProductIds.push(item.product.id)
+            }
+          }
+
+          const { getAvailableStockBulk } = await import("@/lib/master-inventory")
+          const masterLinks = await prisma.masterSkuLink.findMany({
+            where: { productId: { in: allProductIds }, variantId: null, siteId: null },
+            select: { productId: true, masterSkuId: true, quantityMultiplier: true },
+          })
+          const masterLinkMap = new Map(masterLinks.map((l) => [l.productId!, l]))
+
+          let availableMap = new Map<string, number>()
+          if (masterLinks.length > 0) {
+            const masterSkuIds = [...new Set(masterLinks.map((l) => l.masterSkuId))]
+            availableMap = await getAvailableStockBulk(masterSkuIds)
+          }
+
+          const stackData = stacks.map((stack) => ({
+            id: stack.id,
+            name: stack.name,
+            slug: stack.slug,
+            description: stack.description,
+            image: stack.image,
+            items: stack.items.map((si) => ({
+              name: si.product.name,
+              basePrice: Number(si.product.basePrice),
+              imageUrl: si.product.images[0]?.url || null,
+              stock: si.product.stock,
+              isActive: si.product.isActive,
+            })),
+            inStock: stack.items.every((si) => {
+              if (!si.product.isActive) return false
+              const link = masterLinkMap.get(si.product.id)
+              if (link) {
+                const available = availableMap.get(link.masterSkuId) ?? 0
+                return Math.floor(available / link.quantityMultiplier) >= 1
+              }
+              return si.product.stock >= 1
+            }),
+          }))
+
+          return (
+            <StacksGrid
+              key={component.id}
+              heading={settings.heading || "Our Stacks"}
+              stacks={stackData}
+              showViewAll={settings.showViewAll ?? true}
+              {...extractColors(settings)}
+            />
           )
         }
 

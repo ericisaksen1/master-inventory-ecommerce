@@ -192,7 +192,7 @@ export function HeroBanner({
             src={imageUrl}
             alt={imageAlt || heading || ""}
             fill
-            className="object-contain"
+            className="object-cover"
             sizes="(max-width: 768px) 100vw, 50vw"
             priority
           />

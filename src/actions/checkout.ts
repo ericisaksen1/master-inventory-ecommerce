@@ -15,113 +15,8 @@ import { notifyAdminNewOrder, notifyCustomerOrderPlaced, notifyAdminLowStock, no
 import { createNotification } from "./notifications"
 import { rateLimitByIp } from "@/lib/rate-limit"
 import { getCart } from "@/actions/cart"
-import {
-  getMasterSkuForProduct,
-  reserveStock,
-  confirmReservation as confirmMasterReservation,
-  releaseReservation,
-  type ReservationItem,
-  type Adjustment,
-} from "@/lib/master-inventory"
+import { getMasterSkuForProduct } from "@/lib/master-inventory"
 import bcrypt from "bcryptjs"
-
-export async function initCheckoutReservation() {
-  const cart = await getCart()
-  if (!cart || cart.items.length === 0) return { hasReservation: false as const }
-
-  type LinkedItem = {
-    cartItemId: string
-    itemName: string
-    masterSkuId: string
-    multiplier: number
-    originalQty: number
-    masterUnits: number
-  }
-
-  const linkedItems: LinkedItem[] = []
-
-  for (const item of cart.items) {
-    const link = await getMasterSkuForProduct(item.productId, item.variantId ?? undefined)
-    if (link) {
-      linkedItems.push({
-        cartItemId: item.id,
-        itemName: item.product.name + (item.variant?.name ? ` — ${item.variant.name}` : ""),
-        masterSkuId: link.masterSkuId,
-        multiplier: link.quantityMultiplier,
-        originalQty: item.quantity,
-        masterUnits: item.quantity * link.quantityMultiplier,
-      })
-    }
-  }
-
-  if (linkedItems.length === 0) return { hasReservation: false as const }
-
-  // Aggregate by masterSkuId for reservation
-  const aggregated = new Map<string, number>()
-  for (const li of linkedItems) {
-    aggregated.set(li.masterSkuId, (aggregated.get(li.masterSkuId) ?? 0) + li.masterUnits)
-  }
-
-  const reservationItems: ReservationItem[] = Array.from(aggregated.entries()).map(
-    ([masterSkuId, quantity]) => ({ masterSkuId, quantity })
-  )
-
-  const sessionRef = crypto.randomUUID()
-  const result = await reserveStock(reservationItems, sessionRef)
-
-  // Process adjustments — update cart quantities if stock was limited
-  const adjustments: { itemName: string; oldQty: number; newQty: number }[] = []
-
-  for (const adj of result.adjustments) {
-    const affectedItems = linkedItems.filter((li) => li.masterSkuId === adj.masterSkuId)
-    let remainingGranted = adj.granted
-
-    for (const li of affectedItems) {
-      const maxUnits = Math.min(li.masterUnits, remainingGranted)
-      const newQty = Math.floor(maxUnits / li.multiplier)
-      remainingGranted -= newQty * li.multiplier
-
-      if (newQty < li.originalQty) {
-        adjustments.push({ itemName: li.itemName, oldQty: li.originalQty, newQty })
-
-        if (newQty > 0) {
-          await prisma.cartItem.update({
-            where: { id: li.cartItemId },
-            data: { quantity: newQty },
-          })
-        } else {
-          await prisma.cartItem.delete({ where: { id: li.cartItemId } })
-        }
-      }
-    }
-  }
-
-  // Store session ref in httpOnly cookie
-  const cookieStore = await cookies()
-  cookieStore.set("checkout_reservation", sessionRef, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: 5 * 60,
-    path: "/",
-  })
-
-  return {
-    hasReservation: true as const,
-    sessionRef,
-    expiresAt: result.expiresAt.toISOString(),
-    adjustments,
-  }
-}
-
-export async function releaseCheckoutReservation() {
-  const cookieStore = await cookies()
-  const sessionRef = cookieStore.get("checkout_reservation")?.value
-  if (!sessionRef) return
-
-  await releaseReservation(sessionRef)
-  cookieStore.delete("checkout_reservation")
-}
 
 export async function createOrder(formData: FormData) {
   const rl = await rateLimitByIp("checkout", 10, 60_000)
@@ -201,7 +96,6 @@ export async function createOrder(formData: FormData) {
   const couponCode = (formData.get("couponCode") as string)?.trim().toUpperCase() || null
   const cookieStore = await cookies()
   const affiliateRef = cookieStore.get("affiliate_ref")?.value
-  const reservationSessionRef = cookieStore.get("checkout_reservation")?.value
 
   // Resolve affiliate attribution (safe outside transaction — no race condition)
   let affiliateId: string | null = null
@@ -223,19 +117,11 @@ export async function createOrder(formData: FormData) {
 
   const orderNumber = generateOrderNumber()
 
-  // Look up master SKU links for all cart items
-  const masterLinkedIds = new Set<string>()
-  if (reservationSessionRef) {
-    for (const item of cart.items) {
-      const link = await getMasterSkuForProduct(item.productId, item.variantId ?? undefined)
-      if (link) masterLinkedIds.add(item.id)
-    }
-
-    // Confirm master inventory reservation before creating order
-    const confirmResult = await confirmMasterReservation(reservationSessionRef)
-    if (!confirmResult.success) {
-      return { error: confirmResult.error || "Some items are no longer available. Please return to your cart." }
-    }
+  // Products linked to a MasterSku have stock managed at the master level — check/decrement MasterSku.stock instead
+  const masterLinks = new Map<string, { masterSkuId: string; quantityMultiplier: number }>()
+  for (const item of cart.items) {
+    const link = await getMasterSkuForProduct(item.productId, item.variantId ?? undefined)
+    if (link) masterLinks.set(item.id, { masterSkuId: link.masterSkuId, quantityMultiplier: link.quantityMultiplier })
   }
 
   // All discount calculation, stock checks, and order creation inside one transaction
@@ -286,9 +172,19 @@ export async function createOrder(formData: FormData) {
     const tax = discountedSubtotal * (taxRate / 100)
     const total = discountedSubtotal + tax + shippingCost
 
-    // Verify stock availability before creating order (skip master-linked items — handled by reservation)
+    // Verify stock availability before creating order
     for (const item of cart.items) {
-      if (masterLinkedIds.has(item.id)) continue
+      const masterLink = masterLinks.get(item.id)
+      if (masterLink) {
+        // Master-linked: check MasterSku stock
+        const masterSku = await tx.masterSku.findUnique({ where: { id: masterLink.masterSkuId } })
+        const needed = item.quantity * masterLink.quantityMultiplier
+        if (!masterSku || masterSku.stock < needed) {
+          throw new Error(`Insufficient stock for ${item.product.name}${item.variant?.name ? ` — ${item.variant.name}` : ""}`)
+        }
+        continue
+      }
+
       const variantOptions = (item.variant?.options ?? []) as { name: string; value: string }[]
       const packOption = variantOptions.find((o) => o.name === "Pack")
       const packSize = packOption ? (parseInt(packOption.value) || 1) : 0
@@ -388,9 +284,18 @@ export async function createOrder(formData: FormData) {
       })
     }
 
-    // Decrement stock (already verified above, skip master-linked items)
+    // Decrement stock (already verified above)
     for (const item of cart.items) {
-      if (masterLinkedIds.has(item.id)) continue
+      const masterLink = masterLinks.get(item.id)
+      if (masterLink) {
+        // Master-linked: decrement MasterSku stock
+        await tx.masterSku.update({
+          where: { id: masterLink.masterSkuId },
+          data: { stock: { decrement: item.quantity * masterLink.quantityMultiplier } },
+        })
+        continue
+      }
+
       const variantOptions = (item.variant?.options ?? []) as { name: string; value: string }[]
       const packOption = variantOptions.find((o) => o.name === "Pack")
       const packSize = packOption ? (parseInt(packOption.value) || 1) : 0
@@ -464,7 +369,20 @@ export async function createOrder(formData: FormData) {
   // Low stock & out-of-stock alerts
   const lowStockThreshold = parseInt(await getSetting("low_stock_threshold") || "10") || 10
   for (const item of cart.items) {
-    if (masterLinkedIds.has(item.id)) continue // Stock alerts for master-linked items handled separately
+    const masterLink = masterLinks.get(item.id)
+    if (masterLink) {
+      // Master-linked: alert based on MasterSku stock (already decremented)
+      const ms = await prisma.masterSku.findUnique({ where: { id: masterLink.masterSkuId } })
+      if (ms) {
+        const name = item.product.name + (item.variant?.name ? ` — ${item.variant.name}` : "")
+        if (ms.stock <= 0) {
+          void notifyAdminOutOfStock(name)
+        } else if (ms.stock < lowStockThreshold) {
+          void notifyAdminLowStock(name, ms.stock)
+        }
+      }
+      continue
+    }
     const variantOptions = (item.variant?.options ?? []) as { name: string; value: string }[]
     const packOption = variantOptions.find((o) => o.name === "Pack")
     const packSize = packOption ? (parseInt(packOption.value) || 1) : 0
@@ -493,11 +411,6 @@ export async function createOrder(formData: FormData) {
         void notifyAdminLowStock(item.product.name, newStock)
       }
     }
-  }
-
-  // Clear reservation cookie
-  if (reservationSessionRef) {
-    cookieStore.delete("checkout_reservation")
   }
 
   revalidatePath("/", "layout")

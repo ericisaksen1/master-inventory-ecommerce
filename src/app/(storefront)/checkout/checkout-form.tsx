@@ -3,12 +3,11 @@
 import { useState, useEffect, useTransition } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { createOrder, releaseCheckoutReservation } from "@/actions/checkout"
+import { createOrder } from "@/actions/checkout"
 import { validateCode, type ValidatedCode } from "@/actions/coupons"
 import { formatCurrency } from "@/lib/utils"
 import { cn } from "@/lib/utils"
 import { TermsModal } from "@/components/storefront/terms-modal"
-import { ReservationTimer } from "./reservation-timer"
 
 const allPaymentMethods = [
   { value: "PAYPAL", label: "PayPal", description: "Pay via PayPal", color: "bg-indigo-100 text-indigo-700" },
@@ -25,12 +24,6 @@ interface CartItem {
   quantity: number
 }
 
-interface StockAdjustment {
-  itemName: string
-  oldQty: number
-  newQty: number
-}
-
 interface CheckoutFormProps {
   cartItems: CartItem[]
   subtotal: number
@@ -40,11 +33,9 @@ interface CheckoutFormProps {
   isGuest: boolean
   enabledPaymentMethods: string[]
   termsContent: string
-  reservationExpiresAt?: string | null
-  stockAdjustments?: StockAdjustment[]
 }
 
-export function CheckoutForm({ cartItems, subtotal, affiliateRef, shippingRate, taxRate, isGuest, enabledPaymentMethods, termsContent, reservationExpiresAt, stockAdjustments }: CheckoutFormProps) {
+export function CheckoutForm({ cartItems, subtotal, affiliateRef, shippingRate, taxRate, isGuest, enabledPaymentMethods, termsContent }: CheckoutFormProps) {
   const paymentMethods = allPaymentMethods.filter((m) => enabledPaymentMethods.includes(m.value))
   const [selectedPayment, setSelectedPayment] = useState<string>("")
   const [error, setError] = useState<string | null>(null)
@@ -64,14 +55,6 @@ export function CheckoutForm({ cartItems, subtotal, affiliateRef, shippingRate, 
   const [discount, setDiscount] = useState<{ type: string; value: number; label: string } | null>(null)
   const [codeError, setCodeError] = useState<string | null>(null)
   const [isValidating, startValidation] = useTransition()
-
-  // Best-effort release reservation on unmount (navigating away from checkout)
-  useEffect(() => {
-    if (!reservationExpiresAt) return
-    return () => {
-      void releaseCheckoutReservation()
-    }
-  }, [reservationExpiresAt])
 
   // Auto-apply affiliate code from cookie on mount
   useEffect(() => {
@@ -180,20 +163,6 @@ export function CheckoutForm({ cartItems, subtotal, affiliateRef, shippingRate, 
           {error && (
             <div className="rounded-md bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/30 dark:text-red-400">
               {error}
-            </div>
-          )}
-
-          {stockAdjustments && stockAdjustments.length > 0 && (
-            <div className="rounded-md bg-yellow-50 p-3 text-sm text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
-              <p className="font-medium">Stock availability adjusted:</p>
-              <ul className="mt-1 list-inside list-disc">
-                {stockAdjustments.map((adj, i) => (
-                  <li key={i}>
-                    {adj.itemName}: quantity changed from {adj.oldQty} to {adj.newQty}
-                    {adj.newQty === 0 ? " (removed)" : ""}
-                  </li>
-                ))}
-              </ul>
             </div>
           )}
 
@@ -380,11 +349,6 @@ export function CheckoutForm({ cartItems, subtotal, affiliateRef, shippingRate, 
       <div className="lg:col-span-2">
         <div className="sticky rounded-lg border border-gray-200 bg-gray-50 p-6 dark:border-gray-700 dark:bg-gray-800" style={{ top: "calc(var(--header-height, 64px) + 1.5rem)" }}>
           <h2 className="text-lg font-semibold">Order Summary</h2>
-          {reservationExpiresAt && (
-            <div className="mt-2">
-              <ReservationTimer expiresAt={reservationExpiresAt} />
-            </div>
-          )}
           <div className="mt-4 divide-y divide-gray-200 dark:divide-gray-700">
             {cartItems.map((item) => (
               <div key={item.id} className="flex justify-between py-3 text-sm">

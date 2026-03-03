@@ -646,6 +646,23 @@ export const componentRegistry: Record<string, ComponentDef> = {
       ...baseColorFieldsNoText,
     ],
   },
+  stacks_grid: {
+    label: "Stacks Grid",
+    defaultSettings: {
+      heading: "Our Stacks",
+      maxStacks: 8,
+      showViewAll: true,
+      ...colorDefaults,
+      ...linkColorDefaults,
+    },
+    fields: [
+      { key: "heading", label: "Heading", type: "text" },
+      { key: "maxStacks", label: "Max Stacks", type: "number" },
+      { key: "showViewAll", label: "Show 'View All' Link", type: "toggle" },
+      ...baseColorFields,
+      ...linkColorFields,
+    ],
+  },
   spacer_divider: {
     label: "Spacer / Divider",
     defaultSettings: {
