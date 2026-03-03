@@ -16,6 +16,11 @@ interface Product {
   imageUrl: string | null
 }
 
+interface StackItem {
+  productId: string
+  quantity: number
+}
+
 interface StackFormProps {
   stack?: {
     id: string
@@ -24,7 +29,7 @@ interface StackFormProps {
     description: string | null
     image: string | null
     isActive: boolean
-    productIds: string[]
+    stackItems: StackItem[]
   }
   products: Product[]
 }
@@ -35,40 +40,54 @@ export function StackForm({ stack, products }: StackFormProps) {
   const router = useRouter()
   const isEditing = !!stack
 
-  const [selectedIds, setSelectedIds] = useState<string[]>(stack?.productIds || [])
+  const [selectedItems, setSelectedItems] = useState<StackItem[]>(
+    stack?.stackItems || []
+  )
   const [search, setSearch] = useState("")
   const [imageUrl, setImageUrl] = useState(stack?.image || "")
   const [imagePickerOpen, setImagePickerOpen] = useState(false)
 
+  const selectedProductIds = selectedItems.map((i) => i.productId)
+
   const filteredProducts = products.filter(
-    (p) => p.name.toLowerCase().includes(search.toLowerCase()) && !selectedIds.includes(p.id)
+    (p) => p.name.toLowerCase().includes(search.toLowerCase()) && !selectedProductIds.includes(p.id)
   )
 
-  const selectedProducts = selectedIds
-    .map((id) => products.find((p) => p.id === id))
-    .filter(Boolean) as Product[]
+  const selectedProducts = selectedItems
+    .map((item) => {
+      const product = products.find((p) => p.id === item.productId)
+      return product ? { ...product, quantity: item.quantity } : null
+    })
+    .filter(Boolean) as (Product & { quantity: number })[]
 
-  const totalPrice = selectedProducts.reduce((sum, p) => sum + p.basePrice, 0)
+  const totalPrice = selectedProducts.reduce((sum, p) => sum + p.basePrice * p.quantity, 0)
+  const totalUnits = selectedProducts.reduce((sum, p) => sum + p.quantity, 0)
 
   function addProduct(id: string) {
-    setSelectedIds((prev) => [...prev, id])
+    setSelectedItems((prev) => [...prev, { productId: id, quantity: 1 }])
     setSearch("")
   }
 
   function removeProduct(id: string) {
-    setSelectedIds((prev) => prev.filter((pid) => pid !== id))
+    setSelectedItems((prev) => prev.filter((item) => item.productId !== id))
+  }
+
+  function updateQuantity(productId: string, quantity: number) {
+    setSelectedItems((prev) =>
+      prev.map((item) => (item.productId === productId ? { ...item, quantity: Math.max(1, quantity) } : item))
+    )
   }
 
   function moveProduct(index: number, direction: -1 | 1) {
-    const newIds = [...selectedIds]
+    const newItems = [...selectedItems]
     const target = index + direction
-    if (target < 0 || target >= newIds.length) return
-    ;[newIds[index], newIds[target]] = [newIds[target], newIds[index]]
-    setSelectedIds(newIds)
+    if (target < 0 || target >= newItems.length) return
+    ;[newItems[index], newItems[target]] = [newItems[target], newItems[index]]
+    setSelectedItems(newItems)
   }
 
   function handleSubmit(formData: FormData) {
-    formData.set("productIds", JSON.stringify(selectedIds))
+    formData.set("stackItems", JSON.stringify(selectedItems))
     formData.set("image", imageUrl)
     startTransition(async () => {
       const result = isEditing
@@ -85,7 +104,8 @@ export function StackForm({ stack, products }: StackFormProps) {
   }
 
   return (
-    <form action={handleSubmit} className="max-w-2xl space-y-6">
+    <form action={handleSubmit} className="space-y-6">
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
       <div className="rounded-lg border border-border bg-background p-6 space-y-4">
         <h2 className="text-sm font-semibold">Basic Info</h2>
         <Input
@@ -152,7 +172,7 @@ export function StackForm({ stack, products }: StackFormProps) {
           <h2 className="text-sm font-semibold">Products in Stack</h2>
           {selectedProducts.length > 0 && (
             <span className="text-sm text-secondary">
-              {selectedProducts.length} {selectedProducts.length === 1 ? "item" : "items"} &mdash; ${totalPrice.toFixed(2)}
+              {totalUnits} {totalUnits === 1 ? "unit" : "units"} &mdash; ${totalPrice.toFixed(2)}
             </span>
           )}
         </div>
@@ -168,7 +188,14 @@ export function StackForm({ stack, products }: StackFormProps) {
                   <div className="h-8 w-8 rounded bg-muted" />
                 )}
                 <span className="flex-1 text-sm font-medium">{product.name}</span>
-                <span className="text-sm text-secondary">${product.basePrice.toFixed(2)}</span>
+                <input
+                  type="number"
+                  min={1}
+                  value={product.quantity}
+                  onChange={(e) => updateQuantity(product.id, parseInt(e.target.value) || 1)}
+                  className="w-14 rounded border border-border bg-background px-2 py-1 text-center text-sm"
+                />
+                <span className="text-sm text-secondary w-16 text-right">${(product.basePrice * product.quantity).toFixed(2)}</span>
                 <div className="flex gap-1">
                   <button
                     type="button"
@@ -232,9 +259,10 @@ export function StackForm({ stack, products }: StackFormProps) {
           )}
         </div>
       </div>
+      </div>
 
       <div className="flex gap-3">
-        <Button type="submit" disabled={isPending || selectedIds.length === 0}>
+        <Button type="submit" disabled={isPending || selectedItems.length === 0}>
           {isPending ? "Saving..." : isEditing ? "Update Stack" : "Create Stack"}
         </Button>
         <Link href="/admin/stacks">

@@ -18,7 +18,7 @@ export default async function EditStackPage({ params }: Props) {
       include: {
         items: {
           orderBy: { sortOrder: "asc" },
-          select: { productId: true },
+          select: { productId: true, quantity: true },
         },
       },
     }),
@@ -43,7 +43,7 @@ export default async function EditStackPage({ params }: Props) {
     description: rawStack.description,
     image: rawStack.image,
     isActive: rawStack.isActive,
-    productIds: rawStack.items.map((i) => i.productId),
+    stackItems: rawStack.items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
   }
 
   const products = rawProducts.map((p) => ({

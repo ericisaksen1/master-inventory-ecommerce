@@ -43,16 +43,18 @@ async function checkStacksStock(stacks: any[]): Promise<StackCardData[]> {
       imageUrl: si.product.images[0]?.url || null,
       stock: si.product.stock,
       isActive: si.product.isActive,
+      quantity: si.quantity ?? 1,
     }))
 
     const inStock = stack.items.every((si: any) => {
+      const qty = si.quantity ?? 1
       if (!si.product.isActive) return false
       const link = masterLinkMap.get(si.product.id)
       if (link) {
         const available = availableMap.get(link.masterSkuId) ?? 0
-        return Math.floor(available / link.quantityMultiplier) >= 1
+        return Math.floor(available / link.quantityMultiplier) >= qty
       }
-      return si.product.stock >= 1
+      return si.product.stock >= qty
     })
 
     return {

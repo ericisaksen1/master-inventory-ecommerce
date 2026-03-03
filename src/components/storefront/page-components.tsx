@@ -577,15 +577,16 @@ export async function PageComponents({ pageId }: PageComponentsProps) {
               imageUrl: si.product.images[0]?.url || null,
               stock: si.product.stock,
               isActive: si.product.isActive,
+              quantity: si.quantity,
             })),
             inStock: stack.items.every((si) => {
               if (!si.product.isActive) return false
               const link = masterLinkMap.get(si.product.id)
               if (link) {
                 const available = availableMap.get(link.masterSkuId) ?? 0
-                return Math.floor(available / link.quantityMultiplier) >= 1
+                return Math.floor(available / link.quantityMultiplier) >= si.quantity
               }
-              return si.product.stock >= 1
+              return si.product.stock >= si.quantity
             }),
           }))
 

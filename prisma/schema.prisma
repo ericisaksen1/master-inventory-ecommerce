@@ -328,6 +328,7 @@ model StackItem {
   id        String @id @default(cuid())
   stackId   String
   productId String
+  quantity  Int    @default(1)
   sortOrder Int    @default(0)
 
   stack   Stack   @relation(fields: [stackId], references: [id], onDelete: Cascade)

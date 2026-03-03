@@ -386,6 +386,7 @@ export function MenuBuilder({ location, label, items: initialItems, linkOptions 
         "/register": "Register",
         "/contact": "Contact",
         "/blog": "Blog",
+        "/stacks": "Stacks",
         "/affiliate/apply": "Become an Affiliate",
         "/affiliate": "Affiliate Dashboard",
       }
@@ -608,6 +609,7 @@ export function MenuBuilder({ location, label, items: initialItems, linkOptions 
             <optgroup label="Shop Pages">
               <option value="/products">All Products</option>
               <option value="/categories">All Categories</option>
+              <option value="/stacks">Stacks</option>
               <option value="/cart">Cart</option>
               <option value="/checkout">Checkout</option>
               <option value="/orders">Order History</option>

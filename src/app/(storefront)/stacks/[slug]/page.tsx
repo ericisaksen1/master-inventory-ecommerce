@@ -70,16 +70,17 @@ export default async function StackDetailPage({ params }: Props) {
     availableMap = await getAvailableStockBulk(masterSkuIds)
   }
 
-  const totalPrice = stack.items.reduce((sum, i) => sum + Number(i.product.basePrice), 0)
+  const totalPrice = stack.items.reduce((sum, i) => sum + Number(i.product.basePrice) * i.quantity, 0)
+  const totalUnits = stack.items.reduce((sum, i) => sum + i.quantity, 0)
 
   const inStock = stack.items.every((item) => {
     if (!item.product.isActive) return false
     const link = masterLinkMap.get(item.product.id)
     if (link) {
       const available = availableMap.get(link.masterSkuId) ?? 0
-      return Math.floor(available / link.quantityMultiplier) >= 1
+      return Math.floor(available / link.quantityMultiplier) >= item.quantity
     }
-    return item.product.stock >= 1
+    return item.product.stock >= item.quantity
   })
 
   const displayImage = stack.image || stack.items[0]?.product.images[0]?.url
@@ -114,7 +115,7 @@ export default async function StackDetailPage({ params }: Props) {
 
           <div className="mt-6">
             <p className="text-sm text-secondary">
-              {stack.items.length} {stack.items.length === 1 ? "item" : "items"} included
+              {totalUnits} {totalUnits === 1 ? "item" : "items"} included
             </p>
             <p className="mt-1 text-3xl font-semibold">{formatCurrency(totalPrice)}</p>
           </div>
@@ -142,8 +143,8 @@ export default async function StackDetailPage({ params }: Props) {
               {stack.items.map((item) => {
                 const link = masterLinkMap.get(item.product.id)
                 const productInStock = link
-                  ? Math.floor((availableMap.get(link.masterSkuId) ?? 0) / link.quantityMultiplier) >= 1
-                  : item.product.stock >= 1
+                  ? Math.floor((availableMap.get(link.masterSkuId) ?? 0) / link.quantityMultiplier) >= item.quantity
+                  : item.product.stock >= item.quantity
 
                 return (
                   <Link
@@ -161,13 +162,19 @@ export default async function StackDetailPage({ params }: Props) {
                       <div className="h-14 w-14 rounded bg-muted" />
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium">{item.product.name}</p>
+                      <p className="text-sm font-medium">
+                        {item.quantity > 1 && <span className="text-secondary">{item.quantity}x </span>}
+                        {item.product.name}
+                      </p>
                       {item.product.shortDescription && (
                         <p className="mt-0.5 text-xs text-secondary truncate">{item.product.shortDescription}</p>
                       )}
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-sm font-medium">{formatCurrency(Number(item.product.basePrice))}</p>
+                      <p className="text-sm font-medium">{formatCurrency(Number(item.product.basePrice) * item.quantity)}</p>
+                      {item.quantity > 1 && (
+                        <p className="text-xs text-secondary">{formatCurrency(Number(item.product.basePrice))} each</p>
+                      )}
                       {!productInStock && (
                         <p className="text-xs text-red-600">Out of stock</p>
                       )}

@@ -24,7 +24,9 @@ export async function createStack(formData: FormData): Promise<{ error?: string 
   const existing = await prisma.stack.findUnique({ where: { slug } })
   if (existing) slug = `${slug}-${Date.now()}`
 
-  const productIds: string[] = JSON.parse((formData.get("productIds") as string) || "[]")
+  const stackItems: { productId: string; quantity: number }[] = JSON.parse(
+    (formData.get("stackItems") as string) || "[]"
+  )
 
   const stack = await prisma.stack.create({
     data: {
@@ -34,8 +36,9 @@ export async function createStack(formData: FormData): Promise<{ error?: string 
       image: (formData.get("image") as string)?.trim() || null,
       isActive: formData.get("isActive") === "on",
       items: {
-        create: productIds.map((productId, i) => ({
-          productId,
+        create: stackItems.map((item, i) => ({
+          productId: item.productId,
+          quantity: item.quantity || 1,
           sortOrder: i,
         })),
       },
@@ -52,7 +55,9 @@ export async function updateStack(stackId: string, formData: FormData): Promise<
   const name = formData.get("name") as string
   if (!name?.trim()) return { error: "Stack name is required" }
 
-  const productIds: string[] = JSON.parse((formData.get("productIds") as string) || "[]")
+  const stackItems: { productId: string; quantity: number }[] = JSON.parse(
+    (formData.get("stackItems") as string) || "[]"
+  )
 
   await prisma.$transaction(async (tx) => {
     await tx.stack.update({
@@ -67,11 +72,12 @@ export async function updateStack(stackId: string, formData: FormData): Promise<
     })
 
     await tx.stackItem.deleteMany({ where: { stackId } })
-    if (productIds.length > 0) {
+    if (stackItems.length > 0) {
       await tx.stackItem.createMany({
-        data: productIds.map((productId, i) => ({
+        data: stackItems.map((item, i) => ({
           stackId,
-          productId,
+          productId: item.productId,
+          quantity: item.quantity || 1,
           sortOrder: i,
         })),
       })
@@ -150,7 +156,7 @@ export async function addStackToCart(stackId: string) {
       if (link) {
         const available = availableMap.get(link.masterSkuId) ?? 0
         const effectiveAvailable = Math.floor(available / link.quantityMultiplier)
-        if (effectiveAvailable < 1) {
+        if (effectiveAvailable < item.quantity) {
           return { error: `${item.product.name} is out of stock` }
         }
       }
@@ -159,14 +165,14 @@ export async function addStackToCart(stackId: string) {
 
   // Check local stock for products without master SKU links
   for (const item of stack.items) {
-    if (!masterLinkMap.has(item.product.id) && item.product.stock < 1) {
+    if (!masterLinkMap.has(item.product.id) && item.product.stock < item.quantity) {
       return { error: `${item.product.name} is out of stock` }
     }
   }
 
-  // Add each product to cart (base product, no variant, qty 1)
+  // Add each product to cart
   for (const item of stack.items) {
-    const result = await addToCart(item.product.id, null, 1)
+    const result = await addToCart(item.product.id, null, item.quantity)
     if (result.error) {
       return { error: `Failed to add ${item.product.name}: ${result.error}` }
     }

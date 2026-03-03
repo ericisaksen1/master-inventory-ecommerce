@@ -8,6 +8,7 @@ export interface StackCardProduct {
   imageUrl: string | null
   stock: number
   isActive: boolean
+  quantity: number
 }
 
 export interface StackCardData {
@@ -26,7 +27,8 @@ interface StackCardProps {
 }
 
 export function StackCard({ stack, compact }: StackCardProps) {
-  const totalPrice = stack.items.reduce((sum, item) => sum + item.basePrice, 0)
+  const totalPrice = stack.items.reduce((sum, item) => sum + item.basePrice * item.quantity, 0)
+  const totalUnits = stack.items.reduce((sum, item) => sum + item.quantity, 0)
   const displayImage = stack.image || stack.items[0]?.imageUrl
 
   if (compact) {
@@ -43,7 +45,7 @@ export function StackCard({ stack, compact }: StackCardProps) {
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium truncate">{stack.name}</p>
           <p className="text-xs text-secondary">
-            {stack.items.length} {stack.items.length === 1 ? "item" : "items"} &mdash; {formatCurrency(totalPrice)}
+            {totalUnits} {totalUnits === 1 ? "item" : "items"} &mdash; {formatCurrency(totalPrice)}
           </p>
         </div>
         {!stack.inStock && (
@@ -103,7 +105,7 @@ export function StackCard({ stack, compact }: StackCardProps) {
         <div className="mt-3 flex items-center justify-between">
           <div>
             <p className="text-sm text-secondary">
-              {stack.items.length} {stack.items.length === 1 ? "item" : "items"}
+              {totalUnits} {totalUnits === 1 ? "item" : "items"}
             </p>
             <p className="text-lg font-semibold">{formatCurrency(totalPrice)}</p>
           </div>
