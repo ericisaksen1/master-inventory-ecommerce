@@ -77,6 +77,11 @@ export default async function AdminOrdersPage({ searchParams }: Props) {
                     >
                       {order.orderNumber}
                     </Link>
+                    {order.sourceSiteId && (
+                      <span className="ml-2 inline-block rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-700">
+                        Drop-ship
+                      </span>
+                    )}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-secondary">
                     {order.user?.name || order.user?.email || order.guestEmail || "Guest"}

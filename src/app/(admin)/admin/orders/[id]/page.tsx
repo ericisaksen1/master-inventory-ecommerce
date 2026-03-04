@@ -22,6 +22,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
       payment: true,
       shippingLabel: true,
       affiliate: { include: { user: true } },
+      sourceSite: true,
     },
   })
 
@@ -146,6 +147,29 @@ export default async function AdminOrderDetailPage({ params }: Props) {
             paymentStatus={order.payment?.status || "PENDING"}
             shippingLabel={shippingLabelData}
           />
+
+          {/* Drop-Ship Source */}
+          {order.sourceSite && (
+            <div className="rounded-lg border border-blue-200 bg-blue-50 p-6">
+              <h3 className="text-sm font-semibold text-blue-900">Drop-Ship Order</h3>
+              <div className="mt-3 text-sm">
+                <p className="font-medium text-blue-800">{order.sourceSite.name}</p>
+                {order.sourceOrderNumber && (
+                  <p className="text-blue-700">Source: #{order.sourceOrderNumber}</p>
+                )}
+                {order.sourceOrderUrl && (
+                  <a
+                    href={order.sourceOrderUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-1 inline-block text-xs text-blue-600 hover:underline"
+                  >
+                    View on {order.sourceSite.name} &rarr;
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Customer */}
           <div className="rounded-lg border border-gray-200 bg-white p-6">

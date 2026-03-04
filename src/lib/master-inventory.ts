@@ -397,3 +397,49 @@ export async function getMasterSkuForRemoteRef(
     quantityMultiplier: link.quantityMultiplier,
   }
 }
+
+/**
+ * Resolve master SKU strings to local products/variants.
+ * Looks up MasterSku by SKU string, then finds the local MasterSkuLink
+ * (where siteId IS NULL) to get the local productId/variantId.
+ */
+export async function resolveLocalProducts(
+  masterSkuStrings: string[]
+): Promise<
+  Map<
+    string,
+    { masterSkuId: string; productId: string; variantId: string | null; quantityMultiplier: number }
+  >
+> {
+  if (masterSkuStrings.length === 0) return new Map()
+
+  const masterSkus = await prisma.masterSku.findMany({
+    where: { sku: { in: masterSkuStrings }, isActive: true },
+  })
+
+  if (masterSkus.length === 0) return new Map()
+
+  const masterSkuIds = masterSkus.map((ms) => ms.id)
+  const localLinks = await prisma.masterSkuLink.findMany({
+    where: { masterSkuId: { in: masterSkuIds }, siteId: null },
+    include: { masterSku: { select: { sku: true } } },
+  })
+
+  const result = new Map<
+    string,
+    { masterSkuId: string; productId: string; variantId: string | null; quantityMultiplier: number }
+  >()
+
+  for (const link of localLinks) {
+    if (link.productId) {
+      result.set(link.masterSku.sku, {
+        masterSkuId: link.masterSkuId,
+        productId: link.productId,
+        variantId: link.variantId,
+        quantityMultiplier: link.quantityMultiplier,
+      })
+    }
+  }
+
+  return result
+}

@@ -105,6 +105,7 @@ export async function purchaseShippingLabel(
         id: true,
         orderNumber: true,
         status: true,
+        guestEmail: true,
         shippingLabel: true,
         shippingAddress: true,
         user: { select: { email: true } },
@@ -142,11 +143,12 @@ export async function purchaseShippingLabel(
       })
     })
 
-    if (order.user?.email) {
+    const shippedEmail = order.user?.email || order.guestEmail
+    if (shippedEmail) {
       const sendShippedEmail = await getSetting("email_shipped")
       if (sendShippedEmail === "true") {
         void notifyCustomerShipped(
-          order.user.email,
+          shippedEmail,
           order.orderNumber,
           label.carrier,
           label.service,

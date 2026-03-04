@@ -91,10 +91,11 @@ export async function confirmPayment(orderId: string) {
     }
   })
 
-  if (order.user?.email) {
+  const customerEmail = order.user?.email || order.guestEmail
+  if (customerEmail) {
     const sendPaymentEmail = await getSetting("email_payment_confirmed")
     if (sendPaymentEmail === "true") {
-      void notifyCustomerStatusChanged(order.user.email, order.orderNumber, "PAYMENT_COMPLETE")
+      void notifyCustomerStatusChanged(customerEmail, order.orderNumber, "PAYMENT_COMPLETE")
     }
   }
 
@@ -115,7 +116,7 @@ export async function updateOrderStatus(
 
     const order = await prisma.order.findUnique({
       where: { id: orderId },
-      select: { orderNumber: true, user: { select: { email: true } } },
+      select: { orderNumber: true, guestEmail: true, user: { select: { email: true } } },
     })
 
     await prisma.order.update({
@@ -123,8 +124,9 @@ export async function updateOrderStatus(
       data: { status },
     })
 
-    if (order?.user?.email) {
-      void notifyCustomerStatusChanged(order.user.email, order.orderNumber, status)
+    const statusEmail = order?.user?.email || order?.guestEmail
+    if (statusEmail) {
+      void notifyCustomerStatusChanged(statusEmail, order.orderNumber, status)
     }
 
     revalidatePath(`/admin/orders/${orderId}`)
@@ -143,13 +145,14 @@ export async function resendStatusEmail(
 
     const order = await prisma.order.findUnique({
       where: { id: orderId },
-      select: { orderNumber: true, status: true, user: { select: { email: true } } },
+      select: { orderNumber: true, status: true, guestEmail: true, user: { select: { email: true } } },
     })
 
     if (!order) return { success: false, error: "Order not found" }
-    if (!order.user?.email) return { success: false, error: "No email address for this customer" }
+    const resendEmail = order.user?.email || order.guestEmail
+    if (!resendEmail) return { success: false, error: "No email address for this customer" }
 
-    await notifyCustomerStatusChanged(order.user.email, order.orderNumber, order.status)
+    await notifyCustomerStatusChanged(resendEmail, order.orderNumber, order.status)
     return { success: true }
   } catch {
     return { success: false, error: "Failed to send email" }
