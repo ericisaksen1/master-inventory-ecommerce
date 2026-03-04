@@ -50,6 +50,12 @@ export async function register(formData: FormData) {
 
   void notifyAdminNewUser(name, email)
 
+  void prisma.subscriber.upsert({
+    where: { email },
+    update: {},
+    create: { email, source: "registration" },
+  })
+
   return { success: "Account created. Please log in." }
 }
 

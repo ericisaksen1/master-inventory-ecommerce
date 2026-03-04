@@ -7,6 +7,7 @@ import { MobileMenu } from "./mobile-menu"
 import { getCartCount } from "@/actions/cart"
 import { getSettings } from "@/lib/settings"
 import { getMenuItems } from "@/actions/menus"
+import { BulkOrderTrigger } from "./bulk-order-trigger"
 
 interface MenuChild {
   id: string
@@ -50,6 +51,9 @@ function MenuLink({
   item: { label: string; url: string; linkTarget: string | null }
   className: string
 }) {
+  if (item.url === "#bulk-order") {
+    return <BulkOrderTrigger className={className} label={item.label} />
+  }
   return item.linkTarget === "_blank" ? (
     <a href={item.url} target="_blank" rel="noopener noreferrer" className={className}>
       {item.label}

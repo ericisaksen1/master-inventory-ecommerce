@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { auth } from "@/auth"
 import { getMenuItems } from "@/actions/menus"
+import { BulkOrderTrigger } from "./bulk-order-trigger"
 import { getSettings } from "@/lib/settings"
 import { sanitizeHtml } from "@/lib/sanitize"
 import { TermsModal } from "@/components/storefront/terms-modal"
@@ -47,6 +48,9 @@ function FooterLink({
   item: { label: string; url: string; linkTarget: string | null }
   className: string
 }) {
+  if (item.url === "#bulk-order") {
+    return <BulkOrderTrigger className={className} label={item.label} />
+  }
   return item.linkTarget === "_blank" ? (
     <a href={item.url} target="_blank" rel="noopener noreferrer" className={className}>
       {item.label}

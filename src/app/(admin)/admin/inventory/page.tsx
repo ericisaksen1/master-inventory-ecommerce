@@ -9,10 +9,6 @@ export default async function AdminInventoryPage() {
   const rawSkus = await prisma.masterSku.findMany({
     include: {
       _count: { select: { productLinks: true } },
-      reservations: {
-        where: { status: "ACTIVE", expiresAt: { gt: new Date() } },
-        select: { quantity: true },
-      },
     },
     orderBy: { createdAt: "desc" },
   })
@@ -22,8 +18,6 @@ export default async function AdminInventoryPage() {
     sku: s.sku,
     name: s.name,
     stock: s.stock,
-    reserved: s.reservations.reduce((sum, r) => sum + r.quantity, 0),
-    available: Math.max(0, s.stock - s.reservations.reduce((sum, r) => sum + r.quantity, 0)),
     linkedProducts: s._count.productLinks,
     isActive: s.isActive,
   }))

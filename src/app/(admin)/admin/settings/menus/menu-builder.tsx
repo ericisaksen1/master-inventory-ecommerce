@@ -620,6 +620,7 @@ export function MenuBuilder({ location, label, items: initialItems, linkOptions 
               <option value="/register">Register</option>
               <option value="/affiliate/apply">Become an Affiliate</option>
               <option value="/affiliate">Affiliate Dashboard</option>
+              <option value="#bulk-order">Bulk Order Popup</option>
             </optgroup>
             {Object.entries(groupedOptions).map(([group, options]) => (
               <optgroup key={group} label={group}>

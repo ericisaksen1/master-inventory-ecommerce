@@ -30,6 +30,13 @@ export async function submitContactMessage(formData: FormData) {
     data: { name, email, subject, message },
   })
 
+  // Add to subscriber list
+  void prisma.subscriber.upsert({
+    where: { email },
+    update: {},
+    create: { email, source: "contact" },
+  })
+
   // Fire-and-forget notifications
   notifyAdminContactMessage(name, email, subject, message)
   void createNotification({

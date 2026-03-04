@@ -291,3 +291,35 @@ export function passwordChangedTemplate(
     `, branding),
   }
 }
+
+// ── Bulk Order Templates ──
+
+export function bulkOrderAdminTemplate(email: string, branding: EmailBranding = {}) {
+  return {
+    subject: `New Bulk Order Price List Request`,
+    html: layout("New Bulk Order Request", `
+      <p>A visitor has requested the bulk order price list:</p>
+      <table style="width:100%;border-collapse:collapse;margin:16px 0">
+        <tr>
+          <td style="padding:8px 12px;background:#f9f9f9;font-weight:600;width:100px">Email</td>
+          <td style="padding:8px 12px">${esc(email)}</td>
+        </tr>
+      </table>
+    `, branding),
+  }
+}
+
+export function bulkOrderCustomerTemplate(customization: TemplateCustomization = {}) {
+  const { branding, subject, introText, outroText } = customization
+  const defaultSubject = "Your Bulk Order Price List"
+
+  return {
+    subject: subject || defaultSubject,
+    html: layout("Bulk Order Price List", `
+      ${wrapIntro(introText)}
+      <p>Thank you for your interest in bulk ordering! Please find our price list attached to this email.</p>
+      <p>If you have any questions or would like to place a bulk order, simply reply to this email.</p>
+      ${wrapOutro(outroText)}
+    `, branding),
+  }
+}

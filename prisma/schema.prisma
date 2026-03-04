@@ -73,13 +73,6 @@ enum CommissionType {
   PARENT
 }
 
-enum ReservationStatus {
-  ACTIVE
-  CONFIRMED
-  EXPIRED
-  RELEASED
-}
-
 // ============================================================
 // USER & AUTH
 // ============================================================
@@ -827,6 +820,7 @@ model AdminNotification {
 model Subscriber {
   id        String   @id @default(cuid())
   email     String   @unique
+  source    String   @default("newsletter")
   createdAt DateTime @default(now())
 
   @@map("subscribers")
@@ -887,7 +881,6 @@ model MasterSku {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  reservations StockReservation[]
   productLinks MasterSkuLink[]
 
   @@index([sku])
@@ -926,30 +919,10 @@ model ConnectedSite {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  links        MasterSkuLink[]
-  reservations StockReservation[]
-  orders       Order[]
+  links   MasterSkuLink[]
+  orders  Order[]
 
   @@index([apiKey])
   @@map("connected_sites")
 }
 
-model StockReservation {
-  id          String            @id @default(cuid())
-  masterSkuId String
-  siteId      String?
-  sessionRef  String
-  quantity    Int
-  status      ReservationStatus @default(ACTIVE)
-  expiresAt   DateTime
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-
-  masterSku MasterSku      @relation(fields: [masterSkuId], references: [id], onDelete: Cascade)
-  site      ConnectedSite? @relation(fields: [siteId], references: [id], onDelete: SetNull)
-
-  @@index([masterSkuId, status])
-  @@index([sessionRef])
-  @@index([expiresAt])
-  @@map("stock_reservations")
-}

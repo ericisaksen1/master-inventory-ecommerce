@@ -13,6 +13,8 @@ import {
   shippingConfirmationTemplate,
   passwordChangedTemplate,
   passwordResetTemplate,
+  bulkOrderAdminTemplate,
+  bulkOrderCustomerTemplate,
 } from "./templates"
 
 // ── Personalization Helpers ──
@@ -38,6 +40,10 @@ const EMAIL_PERSONALIZATION_KEYS = [
   "email_tpl_password_changed_subject",
   "email_tpl_password_changed_intro",
   "email_tpl_password_changed_outro",
+  "email_tpl_bulk_order_subject",
+  "email_tpl_bulk_order_intro",
+  "email_tpl_bulk_order_outro",
+  "bulk_order_pdf_url",
 ]
 
 interface EmailPersonalization {
@@ -179,4 +185,36 @@ export async function sendPasswordResetEmail(email: string, resetUrl: string) {
   const customization = getTemplateCustomization(settings, "password_reset", branding, mergeVars)
   const { subject, html } = passwordResetTemplate(resetUrl, customization)
   await sendEmail(email, subject, html)
+}
+
+// ── Bulk Order ──
+
+export async function notifyAdminBulkOrderRequest(customerEmail: string) {
+  const { adminEmail, branding } = await getEmailPersonalization()
+  if (!adminEmail) return
+  const { subject, html } = bulkOrderAdminTemplate(customerEmail, branding)
+  await sendEmail(adminEmail, subject, html)
+}
+
+export async function notifyCustomerBulkOrder(customerEmail: string) {
+  const { branding, settings } = await getEmailPersonalization()
+  const mergeVars = { storeName: branding.storeName || "" }
+  const customization = getTemplateCustomization(settings, "bulk_order", branding, mergeVars)
+  const { subject, html } = bulkOrderCustomerTemplate(customization)
+
+  const pdfUrl = settings.bulk_order_pdf_url
+  let attachments: { filename: string; content: Buffer }[] | undefined
+  if (pdfUrl) {
+    try {
+      const { readFileSync } = await import("fs")
+      const path = await import("path")
+      const pdfPath = path.join(process.cwd(), "public", pdfUrl)
+      const content = readFileSync(pdfPath)
+      attachments = [{ filename: "bulk-price-list.pdf", content: Buffer.from(content) }]
+    } catch {
+      console.error("[email] Bulk order PDF not found at:", pdfUrl)
+    }
+  }
+
+  await sendEmail(customerEmail, subject, html, attachments)
 }

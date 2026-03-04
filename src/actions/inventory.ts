@@ -5,7 +5,6 @@ import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { randomBytes } from "crypto"
-import { cleanupExpiredReservations } from "@/lib/master-inventory"
 
 async function requireAdmin() {
   const session = await auth()
@@ -300,7 +299,7 @@ export async function deleteConnectedSite(id: string): Promise<{ success: boolea
 
   const site = await prisma.connectedSite.findUnique({
     where: { id },
-    include: { _count: { select: { links: true, reservations: true } } },
+    include: { _count: { select: { links: true } } },
   })
 
   if (!site) return { success: false, error: "Site not found" }
@@ -332,13 +331,3 @@ export async function regenerateSiteApiKey(siteId: string): Promise<{ apiKey?: s
   return { apiKey }
 }
 
-// ============================================================
-// Reservation Management
-// ============================================================
-
-export async function cleanupExpiredReservationsAction(): Promise<{ count: number }> {
-  await requireAdmin()
-  const count = await cleanupExpiredReservations()
-  revalidatePath("/admin/inventory/reservations")
-  return { count }
-}

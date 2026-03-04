@@ -1,6 +1,8 @@
 "use server"
 
 import { prisma } from "@/lib/prisma"
+import { auth } from "@/auth"
+import { revalidatePath } from "next/cache"
 import { createNotification } from "./notifications"
 
 export async function subscribeToNewsletter(email: string) {
@@ -24,5 +26,17 @@ export async function subscribeToNewsletter(email: string) {
     link: "/admin/customers",
   })
 
+  return { success: true }
+}
+
+export async function deleteSubscriber(id: string) {
+  const session = await auth()
+  const role = session?.user?.role
+  if (role !== "ADMIN" && role !== "SUPER_ADMIN") {
+    return { error: "Unauthorized" }
+  }
+
+  await prisma.subscriber.delete({ where: { id } })
+  revalidatePath("/admin/subscribers")
   return { success: true }
 }

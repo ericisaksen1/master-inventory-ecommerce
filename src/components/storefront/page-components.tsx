@@ -12,6 +12,7 @@ import { PaymentMethods } from "./payment-methods"
 import { RichTextBlock } from "./rich-text-block"
 import { CtaBanner } from "./cta-banner"
 import { NewsletterSignup } from "./newsletter-signup"
+import { BulkOrderCta } from "./bulk-order-cta"
 import { CountdownTimer } from "./countdown-timer"
 import { Testimonials } from "./testimonials"
 import { TrustBadges } from "./trust-badges"
@@ -315,6 +316,18 @@ export async function PageComponents({ pageId }: PageComponentsProps) {
               description={settings.description || ""}
               buttonText={settings.buttonText || "Subscribe"}
               placeholder={settings.placeholder || "Enter your email"}
+              {...extractColors(settings)}
+            />
+          )
+        }
+
+        case "bulk_order_cta": {
+          return (
+            <BulkOrderCta
+              key={component.id}
+              heading={settings.heading || "Bulk Ordering"}
+              description={settings.description || ""}
+              buttonText={settings.buttonText || "REQUEST PRICE LIST"}
               {...extractColors(settings)}
             />
           )

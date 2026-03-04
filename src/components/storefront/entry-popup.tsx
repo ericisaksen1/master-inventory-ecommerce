@@ -75,6 +75,7 @@ export function EntryPopup({
     }
     setVisible(false)
     document.body.style.overflow = ""
+    window.dispatchEvent(new Event("entry-popup-accepted"))
   }
 
   function handleDisagree() {

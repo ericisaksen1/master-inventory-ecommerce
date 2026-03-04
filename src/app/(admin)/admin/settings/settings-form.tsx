@@ -14,7 +14,7 @@ interface SettingsFormProps {
   isSuperAdmin: boolean
 }
 
-type SettingsTab = "general" | "payment" | "shipping" | "email" | "tracking" | "legal" | "popup" | "printful"
+type SettingsTab = "general" | "payment" | "shipping" | "email" | "tracking" | "legal" | "popup" | "bulk_order" | "printful"
 
 const tabs: { key: SettingsTab; label: string; superAdminOnly?: boolean }[] = [
   { key: "general", label: "General" },
@@ -24,6 +24,7 @@ const tabs: { key: SettingsTab; label: string; superAdminOnly?: boolean }[] = [
   { key: "tracking", label: "Tracking" },
   { key: "legal", label: "Legal", superAdminOnly: true },
   { key: "popup", label: "Entry Popup", superAdminOnly: true },
+  { key: "bulk_order", label: "Bulk Ordering", superAdminOnly: true },
   { key: "printful", label: "Printful", superAdminOnly: true },
 ]
 
@@ -145,6 +146,12 @@ export function SettingsForm({ settings, isSuperAdmin }: SettingsFormProps) {
 
   // Passcode state
   const [passcodeEnabled, setPasscodeEnabled] = useState(settings.storefront_passcode_enabled === "true")
+
+  // Bulk ordering state
+  const [bulkOrderEnabled, setBulkOrderEnabled] = useState(settings.bulk_order_popup_enabled === "true")
+  const [bulkOrderAfterEntry, setBulkOrderAfterEntry] = useState(settings.bulk_order_show_after_entry === "true")
+  const [bulkOrderPdfUrl, setBulkOrderPdfUrl] = useState(settings.bulk_order_pdf_url || "")
+  const [pdfUploading, setPdfUploading] = useState(false)
 
   // Entry popup state
   const [printfulEnabled, setPrintfulEnabled] = useState(settings.enable_printful === "true")
@@ -874,6 +881,141 @@ export function SettingsForm({ settings, isSuperAdmin }: SettingsFormProps) {
                     />
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Ordering — SUPER_ADMIN only */}
+      {isSuperAdmin && (
+        <div style={{ display: activeTab === "bulk_order" ? undefined : "none" }}>
+          <div className="mt-6">
+            <h2 className="text-lg font-semibold">Bulk Ordering Popup</h2>
+            <p className="mt-1 text-sm text-gray-500">
+              Show a popup to collect emails for bulk order pricing. Visitors receive a PDF price list via email.
+            </p>
+            <div className="mt-4 space-y-4">
+              {/* Enable toggle */}
+              <label className="flex items-center justify-between rounded-lg border border-gray-200 p-4">
+                <div>
+                  <span className="text-sm font-medium text-gray-900">Enable Bulk Order Popup</span>
+                  <p className="text-xs text-gray-500">Show the bulk order email capture popup on the storefront.</p>
+                </div>
+                <input type="hidden" name="setting_bulk_order_popup_enabled" value={bulkOrderEnabled ? "true" : "false"} />
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={bulkOrderEnabled}
+                  onClick={() => setBulkOrderEnabled(!bulkOrderEnabled)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    bulkOrderEnabled ? "bg-black" : "bg-gray-200"
+                  }`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    bulkOrderEnabled ? "translate-x-6" : "translate-x-1"
+                  }`} />
+                </button>
+              </label>
+
+              {/* Show after entry popup toggle */}
+              <label className="flex items-center justify-between rounded-lg border border-gray-200 p-4">
+                <div>
+                  <span className="text-sm font-medium text-gray-900">Show After Entry Popup</span>
+                  <p className="text-xs text-gray-500">Automatically show after visitor clicks &quot;I Agree&quot; on the entry popup.</p>
+                </div>
+                <input type="hidden" name="setting_bulk_order_show_after_entry" value={bulkOrderAfterEntry ? "true" : "false"} />
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={bulkOrderAfterEntry}
+                  onClick={() => setBulkOrderAfterEntry(!bulkOrderAfterEntry)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    bulkOrderAfterEntry ? "bg-black" : "bg-gray-200"
+                  }`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    bulkOrderAfterEntry ? "translate-x-6" : "translate-x-1"
+                  }`} />
+                </button>
+              </label>
+
+              <Input label="Popup Delay (seconds)" name="setting_bulk_order_popup_delay" type="number" defaultValue={settings.bulk_order_popup_delay || "5"} placeholder="5" />
+
+              {/* Email template customization */}
+              <div className="border-t border-gray-200 pt-4">
+                <h3 className="text-sm font-medium text-gray-700">Customer Email Template</h3>
+                <p className="mb-3 mt-1 text-xs text-gray-500">Customize the email sent to visitors who request the price list.</p>
+                <div className="space-y-3">
+                  <Input label="Subject Line" name="setting_email_tpl_bulk_order_subject" defaultValue={settings.email_tpl_bulk_order_subject || ""} placeholder="Your Bulk Order Price List" />
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">Intro Text</label>
+                    <textarea
+                      name="setting_email_tpl_bulk_order_intro"
+                      defaultValue={settings.email_tpl_bulk_order_intro || ""}
+                      placeholder="Optional intro paragraph above the main content"
+                      rows={2}
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">Outro Text</label>
+                    <textarea
+                      name="setting_email_tpl_bulk_order_outro"
+                      defaultValue={settings.email_tpl_bulk_order_outro || ""}
+                      placeholder="Optional closing paragraph below the main content"
+                      rows={2}
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* PDF Upload */}
+              <div className="border-t border-gray-200 pt-4">
+                <h3 className="text-sm font-medium text-gray-700">Price List PDF</h3>
+                <p className="mt-1 text-xs text-gray-500">Upload a PDF that will be attached to the customer email.</p>
+                <input type="hidden" name="setting_bulk_order_pdf_url" value={bulkOrderPdfUrl} />
+                {bulkOrderPdfUrl ? (
+                  <div className="mt-2 flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-3">
+                    <svg className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-sm font-medium text-green-800">PDF uploaded</span>
+                    <a href={bulkOrderPdfUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 underline">View</a>
+                    <button type="button" onClick={() => setBulkOrderPdfUrl("")} className="ml-auto text-xs text-red-500 underline">Remove</button>
+                  </div>
+                ) : (
+                  <p className="mt-2 text-xs text-amber-600">No PDF uploaded yet. Upload one below.</p>
+                )}
+                <input
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    setPdfUploading(true)
+                    try {
+                      const fd = new FormData()
+                      fd.append("file", file)
+                      const res = await fetch("/api/upload/pdf", { method: "POST", body: fd })
+                      const data = await res.json()
+                      if (data.url) {
+                        setBulkOrderPdfUrl(data.url)
+                        toast("PDF uploaded successfully")
+                      } else {
+                        toast(data.error || "Upload failed", "error")
+                      }
+                    } catch {
+                      toast("Upload failed", "error")
+                    }
+                    setPdfUploading(false)
+                    e.target.value = ""
+                  }}
+                  className="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:rounded-lg file:border-0 file:bg-black file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-gray-800"
+                  disabled={pdfUploading}
+                />
+                {pdfUploading && <p className="mt-1 text-xs text-gray-500">Uploading...</p>}
               </div>
             </div>
           </div>

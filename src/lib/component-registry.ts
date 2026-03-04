@@ -309,6 +309,23 @@ export const componentRegistry: Record<string, ComponentDef> = {
       ...buttonColorFields,
     ],
   },
+  bulk_order_cta: {
+    label: "Bulk Order CTA",
+    defaultSettings: {
+      heading: "Bulk Ordering",
+      description: "Save over 60% on all your favorite research chemical peptides.",
+      buttonText: "REQUEST PRICE LIST",
+      ...colorDefaults,
+      ...buttonColorDefaults,
+    },
+    fields: [
+      { key: "heading", label: "Heading", type: "text" },
+      { key: "description", label: "Description", type: "text" },
+      { key: "buttonText", label: "Button Text", type: "text" },
+      ...baseColorFields,
+      ...buttonColorFields,
+    ],
+  },
   countdown_timer: {
     label: "Countdown Timer",
     defaultSettings: {

@@ -13,8 +13,6 @@ interface MasterSku {
   sku: string
   name: string
   stock: number
-  reserved: number
-  available: number
   linkedProducts: number
   isActive: boolean
 }
@@ -33,8 +31,6 @@ export function MasterSkuTable({ masterSkus }: { masterSkus: MasterSku[] }) {
               <th className="px-4 py-3 text-left font-medium">SKU</th>
               <th className="px-4 py-3 text-left font-medium">Name</th>
               <th className="px-4 py-3 text-left font-medium">Stock</th>
-              <th className="px-4 py-3 text-left font-medium">Reserved</th>
-              <th className="px-4 py-3 text-left font-medium">Available</th>
               <th className="px-4 py-3 text-left font-medium">Links</th>
               <th className="px-4 py-3 text-left font-medium">Status</th>
             </tr>
@@ -90,17 +86,9 @@ function MasterSkuRow({
             </div>
           </div>
         </td>
-        <td className="px-4 py-3">{sku.stock}</td>
         <td className="px-4 py-3">
-          {sku.reserved > 0 ? (
-            <span className="text-amber-600">{sku.reserved}</span>
-          ) : (
-            <span className="text-secondary">0</span>
-          )}
-        </td>
-        <td className="px-4 py-3">
-          <span className={sku.available <= 0 ? "font-medium text-red-600" : sku.available <= 10 ? "text-amber-600" : ""}>
-            {sku.available}
+          <span className={sku.stock <= 0 ? "font-medium text-red-600" : sku.stock <= 10 ? "text-amber-600" : ""}>
+            {sku.stock}
           </span>
         </td>
         <td className="px-4 py-3 text-secondary">{sku.linkedProducts}</td>
@@ -112,7 +100,7 @@ function MasterSkuRow({
       </tr>
       {isEditing && (
         <tr>
-          <td colSpan={7} className="border-t border-border bg-muted/50 px-4 py-4">
+          <td colSpan={5} className="border-t border-border bg-muted/50 px-4 py-4">
             <QuickEditForm sku={sku} onClose={onClose} />
           </td>
         </tr>

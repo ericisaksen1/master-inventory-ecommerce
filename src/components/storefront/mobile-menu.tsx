@@ -32,6 +32,17 @@ function MobileMenuLink({
   onClose: () => void
   className: string
 }) {
+  if (item.url === "#bulk-order") {
+    return (
+      <button
+        type="button"
+        onClick={() => { window.dispatchEvent(new Event("open-bulk-order-popup")); onClose() }}
+        className={className}
+      >
+        {item.label}
+      </button>
+    )
+  }
   return item.linkTarget === "_blank" ? (
     <a href={item.url} target="_blank" rel="noopener noreferrer" onClick={onClose} className={className}>
       {item.label}

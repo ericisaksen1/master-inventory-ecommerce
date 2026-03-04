@@ -3,7 +3,7 @@ import { authenticateApiKey } from "@/lib/api-auth"
 import { rateLimit } from "@/lib/rate-limit"
 import { prisma } from "@/lib/prisma"
 import { generateOrderNumber, formatCurrency } from "@/lib/utils"
-import { resolveLocalProducts, confirmReservation } from "@/lib/master-inventory"
+import { resolveLocalProducts } from "@/lib/master-inventory"
 import { notifyAdminNewOrder, notifyAdminLowStock, notifyAdminOutOfStock } from "@/lib/email/notify"
 import { createNotification } from "@/actions/notifications"
 
@@ -40,7 +40,6 @@ interface InboundOrderBody {
   shippingCost: number
   discountAmount: number
   total: number
-  sessionRef?: string
   notes?: string
 }
 
@@ -94,52 +93,41 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  // 5. Handle stock — confirm reservation or direct deduction
-  if (body.sessionRef) {
-    const result = await confirmReservation(body.sessionRef, auth.site.id)
-    if (!result.success) {
+  // 5. Verify stock and decrement
+  const skuIds = [...new Set(body.items.map((i) => localMap.get(i.masterSku)!.masterSkuId))]
+  const masterSkuRecords = await prisma.masterSku.findMany({
+    where: { id: { in: skuIds } },
+    select: { id: true, sku: true, stock: true, name: true },
+  })
+  const stockMap = new Map(masterSkuRecords.map((m) => [m.id, m]))
+
+  // Aggregate quantities per master SKU
+  const qtyByMasterSku = new Map<string, number>()
+  for (const item of body.items) {
+    const local = localMap.get(item.masterSku)!
+    const current = qtyByMasterSku.get(local.masterSkuId) ?? 0
+    qtyByMasterSku.set(local.masterSkuId, current + item.quantity)
+  }
+
+  for (const [msId, qty] of qtyByMasterSku) {
+    const ms = stockMap.get(msId)
+    if (!ms || ms.stock < qty) {
       return NextResponse.json(
-        { error: result.error || "Failed to confirm stock reservation" },
+        { error: `Insufficient stock for ${ms?.sku || msId}: have ${ms?.stock ?? 0}, need ${qty}` },
         { status: 409 }
       )
     }
-  } else {
-    // Direct deduction — verify stock and decrement
-    const skuIds = [...new Set(body.items.map((i) => localMap.get(i.masterSku)!.masterSkuId))]
-    const masterSkus = await prisma.masterSku.findMany({
-      where: { id: { in: skuIds } },
-      select: { id: true, sku: true, stock: true, name: true },
-    })
-    const stockMap = new Map(masterSkus.map((m) => [m.id, m]))
-
-    // Aggregate quantities per master SKU
-    const qtyByMasterSku = new Map<string, number>()
-    for (const item of body.items) {
-      const local = localMap.get(item.masterSku)!
-      const current = qtyByMasterSku.get(local.masterSkuId) ?? 0
-      qtyByMasterSku.set(local.masterSkuId, current + item.quantity)
-    }
-
-    for (const [msId, qty] of qtyByMasterSku) {
-      const ms = stockMap.get(msId)
-      if (!ms || ms.stock < qty) {
-        return NextResponse.json(
-          { error: `Insufficient stock for ${ms?.sku || msId}: have ${ms?.stock ?? 0}, need ${qty}` },
-          { status: 409 }
-        )
-      }
-    }
-
-    // Decrement in transaction
-    await prisma.$transaction(
-      [...qtyByMasterSku.entries()].map(([msId, qty]) =>
-        prisma.masterSku.update({
-          where: { id: msId },
-          data: { stock: { decrement: qty } },
-        })
-      )
-    )
   }
+
+  // Decrement in transaction
+  await prisma.$transaction(
+    [...qtyByMasterSku.entries()].map(([msId, qty]) =>
+      prisma.masterSku.update({
+        where: { id: msId },
+        data: { stock: { decrement: qty } },
+      })
+    )
+  )
 
   // 6. Create order in transaction
   const labRatsOrderNumber = generateOrderNumber()

@@ -64,6 +64,10 @@ const SENSITIVE_KEYS = [
   "printful_api_key", "printful_webhook_secret",
   // Passcode
   "storefront_passcode_enabled", "storefront_passcode_value",
+  // Bulk Ordering
+  "bulk_order_popup_enabled", "bulk_order_popup_delay",
+  "bulk_order_show_after_entry", "bulk_order_pdf_url",
+  "email_tpl_bulk_order_subject", "email_tpl_bulk_order_intro", "email_tpl_bulk_order_outro",
   // Theme colors (read-only, for swatch pickers)
   "primary_color", "secondary_color", "accent_color",
   "foreground_color", "background_color", "muted_color", "border_color",

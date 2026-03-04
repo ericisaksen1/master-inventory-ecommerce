@@ -3,7 +3,6 @@ import { notFound } from "next/navigation"
 import { MasterSkuForm } from "../master-sku-form"
 import { LinkManager } from "./link-manager"
 import Link from "next/link"
-import { getAvailableStock } from "@/lib/master-inventory"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -26,8 +25,6 @@ export default async function MasterSkuDetailPage({ params }: Props) {
   })
 
   if (!masterSku) notFound()
-
-  const available = await getAvailableStock(masterSku.id)
 
   const products = await prisma.product.findMany({
     where: { isActive: true },
@@ -57,9 +54,7 @@ export default async function MasterSkuDetailPage({ params }: Props) {
             <span className="ml-2 text-lg font-normal text-secondary">{masterSku.name}</span>
           </h1>
           <p className="mt-1 text-sm text-secondary">
-            Available: <span className={available <= 0 ? "font-medium text-red-600" : available <= 10 ? "text-amber-600" : "text-green-600"}>{available}</span>
-            {" / "}
-            {masterSku.stock} total
+            Stock: <span className={masterSku.stock <= 0 ? "font-medium text-red-600" : masterSku.stock <= 10 ? "text-amber-600" : "text-green-600"}>{masterSku.stock}</span>
           </p>
         </div>
       </div>

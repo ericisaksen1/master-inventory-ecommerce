@@ -3,7 +3,12 @@ import nodemailer from "nodemailer"
 import { Resend } from "resend"
 import sgMail from "@sendgrid/mail"
 
-export async function sendEmail(to: string, subject: string, html: string): Promise<void> {
+export interface EmailAttachment {
+  filename: string
+  content: Buffer
+}
+
+export async function sendEmail(to: string, subject: string, html: string, attachments?: EmailAttachment[]): Promise<void> {
   try {
     const settings = await getSettings([
       "email_provider",
@@ -43,7 +48,7 @@ export async function sendEmail(to: string, subject: string, html: string): Prom
           secure: port === 465,
           auth: user ? { user, pass } : undefined,
         })
-        await transporter.sendMail({ from, to, subject, html })
+        await transporter.sendMail({ from, to, subject, html, attachments: attachments?.map((a) => ({ filename: a.filename, content: a.content })) })
         break
       }
 
@@ -54,7 +59,7 @@ export async function sendEmail(to: string, subject: string, html: string): Prom
           return
         }
         const resend = new Resend(apiKey)
-        await resend.emails.send({ from, to, subject, html })
+        await resend.emails.send({ from, to, subject, html, attachments: attachments?.map((a) => ({ filename: a.filename, content: a.content })) })
         break
       }
 
@@ -65,7 +70,7 @@ export async function sendEmail(to: string, subject: string, html: string): Prom
           return
         }
         sgMail.setApiKey(apiKey)
-        await sgMail.send({ from, to, subject, html })
+        await sgMail.send({ from, to, subject, html, attachments: attachments?.map((a) => ({ filename: a.filename, content: a.content.toString("base64"), type: "application/pdf", disposition: "attachment" })) })
         break
       }
 
@@ -78,7 +83,7 @@ export async function sendEmail(to: string, subject: string, html: string): Prom
 }
 
 /** Same as sendEmail but throws on failure instead of swallowing errors. */
-export async function sendEmailOrThrow(to: string, subject: string, html: string): Promise<void> {
+export async function sendEmailOrThrow(to: string, subject: string, html: string, attachments?: EmailAttachment[]): Promise<void> {
   const settings = await getSettings([
     "email_provider",
     "email_from_name",
@@ -113,7 +118,7 @@ export async function sendEmailOrThrow(to: string, subject: string, html: string
         secure: port === 465,
         auth: user ? { user, pass } : undefined,
       })
-      await transporter.sendMail({ from, to, subject, html })
+      await transporter.sendMail({ from, to, subject, html, attachments: attachments?.map((a) => ({ filename: a.filename, content: a.content })) })
       break
     }
 
@@ -121,7 +126,7 @@ export async function sendEmailOrThrow(to: string, subject: string, html: string
       const apiKey = settings.email_resend_api_key
       if (!apiKey) throw new Error("Resend API key is not configured")
       const resend = new Resend(apiKey)
-      const result = await resend.emails.send({ from, to, subject, html })
+      const result = await resend.emails.send({ from, to, subject, html, attachments: attachments?.map((a) => ({ filename: a.filename, content: a.content })) })
       if (result.error) throw new Error(result.error.message)
       break
     }
@@ -130,7 +135,7 @@ export async function sendEmailOrThrow(to: string, subject: string, html: string
       const apiKey = settings.email_sendgrid_api_key
       if (!apiKey) throw new Error("SendGrid API key is not configured")
       sgMail.setApiKey(apiKey)
-      await sgMail.send({ from, to, subject, html })
+      await sgMail.send({ from, to, subject, html, attachments: attachments?.map((a) => ({ filename: a.filename, content: a.content.toString("base64"), type: "application/pdf", disposition: "attachment" })) })
       break
     }
 

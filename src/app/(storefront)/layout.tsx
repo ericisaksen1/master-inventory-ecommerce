@@ -4,6 +4,7 @@ import { Header } from "@/components/storefront/header"
 import { Footer } from "@/components/storefront/footer"
 import { AlertBar } from "@/components/storefront/alert-bar"
 import { EntryPopup } from "@/components/storefront/entry-popup"
+import { BulkOrderPopup } from "@/components/storefront/bulk-order-popup"
 import { TrackingScripts } from "@/components/storefront/tracking-scripts"
 import { CookieConsent } from "@/components/storefront/cookie-consent"
 import { AdminEditProvider, AdminToolbar } from "@/components/storefront/admin-toolbar"
@@ -36,6 +37,9 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
     "ga4_measurement_id",
     "facebook_pixel_id",
     "tiktok_pixel_id",
+    "bulk_order_popup_enabled",
+    "bulk_order_popup_delay",
+    "bulk_order_show_after_entry",
   ])
 
   // Passcode gate
@@ -87,6 +91,13 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
             disagreeBg: popupSettings.entry_popup_disagree_bg_color,
             disagreeText: popupSettings.entry_popup_disagree_text_color,
           }}
+        />
+      )}
+      {popupSettings.bulk_order_popup_enabled === "true" && (
+        <BulkOrderPopup
+          enabled
+          delaySeconds={Number(popupSettings.bulk_order_popup_delay) || 5}
+          showAfterEntry={popupSettings.bulk_order_show_after_entry === "true"}
         />
       )}
     </AdminEditProvider>
