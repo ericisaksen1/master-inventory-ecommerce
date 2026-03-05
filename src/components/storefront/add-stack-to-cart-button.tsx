@@ -11,17 +11,26 @@ interface AddStackToCartButtonProps {
   inStock: boolean
   size?: "sm" | "md" | "lg"
   className?: string
+  stackName?: string
+  stackImage?: string | null
+  stackPrice?: string
 }
 
-export function AddStackToCartButton({ stackId, inStock, size = "md", className }: AddStackToCartButtonProps) {
+export function AddStackToCartButton({ stackId, inStock, size = "md", className, stackName, stackImage, stackPrice }: AddStackToCartButtonProps) {
   const [isPending, startTransition] = useTransition()
-  const { toast } = useToast()
+  const { toast, cartToast } = useToast()
 
   function handleClick() {
     startTransition(async () => {
       const result = await addStackToCart(stackId)
       if (result.error) {
         toast(result.error, "error")
+      } else if (stackName && stackPrice) {
+        cartToast({
+          name: stackName,
+          image: stackImage,
+          price: stackPrice,
+        })
       } else {
         toast("Stack added to cart!")
       }

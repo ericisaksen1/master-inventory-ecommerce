@@ -21,6 +21,10 @@ interface AddToCartButtonProps {
   hasMultipleVariants: boolean
   stock: number
   iconOnly?: boolean
+  productName?: string
+  productImage?: string | null
+  productPrice?: string
+  variantName?: string | null
 }
 
 export function AddToCartButton({
@@ -30,9 +34,13 @@ export function AddToCartButton({
   hasMultipleVariants,
   stock,
   iconOnly,
+  productName,
+  productImage,
+  productPrice,
+  variantName,
 }: AddToCartButtonProps) {
   const [isPending, startTransition] = useTransition()
-  const { toast } = useToast()
+  const { toast, cartToast } = useToast()
 
   if (hasMultipleVariants) {
     if (iconOnly) {
@@ -62,7 +70,16 @@ export function AddToCartButton({
     startTransition(async () => {
       const result = await addToCart(productId, defaultVariantId, 1)
       if (result.success) {
-        toast("Added to cart!")
+        if (productName && productPrice) {
+          cartToast({
+            name: productName,
+            image: productImage,
+            variant: variantName,
+            price: productPrice,
+          })
+        } else {
+          toast("Added to cart!")
+        }
       }
     })
   }

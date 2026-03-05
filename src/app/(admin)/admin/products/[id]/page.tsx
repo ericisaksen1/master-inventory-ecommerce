@@ -67,7 +67,16 @@ export default async function AdminProductDetailPage({ params }: Props) {
           </Link>
           <h1 className="mt-2 text-2xl font-bold">{product.name}</h1>
         </div>
-        <DeleteProductButton productId={product.id} />
+        <div className="flex items-center gap-3">
+          <Link
+            href={`/products/${product.slug}`}
+            target="_blank"
+            className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-secondary hover:bg-muted hover:text-foreground transition-colors"
+          >
+            View Product &rarr;
+          </Link>
+          <DeleteProductButton productId={product.id} />
+        </div>
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-8 xl:grid-cols-3">

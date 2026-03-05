@@ -1,10 +1,11 @@
 "use client"
 
-import { useTransition } from "react"
+import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/toast"
+import { RichTextEditor } from "@/components/admin/rich-text-editor"
 import { createProduct, updateProduct } from "@/actions/products"
 import Link from "next/link"
 
@@ -33,6 +34,8 @@ export function ProductForm({ product, categories, masterSkuInfo }: ProductFormP
   const { toast } = useToast()
   const router = useRouter()
   const isEditing = !!product
+  const [shortDesc, setShortDesc] = useState(product?.shortDescription || "")
+  const [fullDesc, setFullDesc] = useState(product?.description || "")
 
   function handleSubmit(formData: FormData) {
     startTransition(async () => {
@@ -68,21 +71,13 @@ export function ProductForm({ product, categories, masterSkuInfo }: ProductFormP
         />
         <div>
           <label className="mb-1.5 block text-sm font-medium">Short Description</label>
-          <textarea
-            name="shortDescription"
-            rows={2}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            defaultValue={product?.shortDescription || ""}
-          />
+          <input type="hidden" name="shortDescription" value={shortDesc} />
+          <RichTextEditor content={shortDesc} onChange={setShortDesc} />
         </div>
         <div>
           <label className="mb-1.5 block text-sm font-medium">Full Description</label>
-          <textarea
-            name="description"
-            rows={4}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            defaultValue={product?.description || ""}
-          />
+          <input type="hidden" name="description" value={fullDesc} />
+          <RichTextEditor content={fullDesc} onChange={setFullDesc} />
         </div>
       </div>
 

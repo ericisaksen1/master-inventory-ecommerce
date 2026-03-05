@@ -24,16 +24,18 @@ interface ProductDetailsProps {
   basePrice: string
   isAdmin?: boolean
   masterStockOverrides?: Record<string, number>
+  productName?: string
+  productImage?: string | null
 }
 
-export function ProductDetails({ variants, productId, productStock = 0, basePrice, isAdmin = false, masterStockOverrides }: ProductDetailsProps) {
+export function ProductDetails({ variants, productId, productStock = 0, basePrice, isAdmin = false, masterStockOverrides, productName, productImage }: ProductDetailsProps) {
   const hasVariants = variants.length > 0
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
     variants.length === 1 ? variants[0].id : null
   )
   const [quantity, setQuantity] = useState(1)
   const [isPending, startTransition] = useTransition()
-  const { toast } = useToast()
+  const { toast, cartToast } = useToast()
 
   const selectedVariant = variants.find((v) => v.id === selectedVariantId)
   const hasMultipleVariants = variants.length > 1
@@ -70,7 +72,19 @@ export function ProductDetails({ variants, productId, productStock = 0, basePric
     startTransition(async () => {
       const result = await addToCart(productId, hasVariants ? selectedVariantId! : null, quantity)
       if (result.success) {
-        toast("Added to cart!")
+        const displayPrice = hasVariants && selectedVariant
+          ? formatCurrency(Number(selectedVariant.price) * quantity)
+          : formatCurrency(Number(basePrice) * quantity)
+        if (productName) {
+          cartToast({
+            name: productName,
+            image: productImage,
+            variant: selectedVariant?.name,
+            price: displayPrice,
+          })
+        } else {
+          toast("Added to cart!")
+        }
         setQuantity(1)
       }
     })

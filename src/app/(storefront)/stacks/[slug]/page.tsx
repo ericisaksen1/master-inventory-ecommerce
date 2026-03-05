@@ -133,7 +133,7 @@ export default async function StackDetailPage({ params }: Props) {
           </div>
 
           <div className="mt-6">
-            <AddStackToCartButton stackId={stack.id} inStock={inStock} size="lg" className="w-full" />
+            <AddStackToCartButton stackId={stack.id} inStock={inStock} size="lg" className="w-full" stackName={stack.name} stackImage={displayImage} stackPrice={formatCurrency(totalPrice)} />
           </div>
 
           {/* Product list */}

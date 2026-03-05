@@ -117,7 +117,7 @@ export function StackCard({ stack, compact }: StackCardProps) {
         </div>
 
         <div className="mt-4">
-          <AddStackToCartButton stackId={stack.id} inStock={stack.inStock} className="w-full" />
+          <AddStackToCartButton stackId={stack.id} inStock={stack.inStock} className="w-full" stackName={stack.name} stackImage={displayImage} stackPrice={formatCurrency(totalPrice)} />
         </div>
       </div>
     </div>

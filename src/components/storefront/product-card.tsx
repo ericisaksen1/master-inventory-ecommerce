@@ -102,6 +102,9 @@ export function ProductCard({
                   hasMultipleVariants={product.hasMultipleVariants ?? false}
                   stock={product.stock ?? 0}
                   iconOnly
+                  productName={product.name}
+                  productImage={primaryImage?.url}
+                  productPrice={formatCurrency(product.basePrice.toString())}
                 />
               )}
               <Link
@@ -240,6 +243,9 @@ export function ProductCard({
                 hasMultipleVariants={product.hasMultipleVariants ?? false}
                 stock={product.stock ?? 0}
                 iconOnly
+                productName={product.name}
+                productImage={primaryImage?.url}
+                productPrice={formatCurrency(product.basePrice.toString())}
               />
             )}
             <Link
@@ -298,6 +304,9 @@ export function ProductCard({
               hasMultipleVariants={product.hasMultipleVariants ?? false}
               stock={product.stock ?? 0}
               iconOnly
+              productName={product.name}
+              productImage={primaryImage?.url}
+              productPrice={formatCurrency(product.basePrice.toString())}
             />
           )}
           <Link

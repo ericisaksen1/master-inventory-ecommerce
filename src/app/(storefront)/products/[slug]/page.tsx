@@ -211,7 +211,10 @@ export default async function ProductPage({ params }: Props) {
           </div>
 
           {product.shortDescription && (
-            <p className="mt-4 text-secondary">{product.shortDescription}</p>
+            <div
+              className="prose mt-4 text-secondary"
+              dangerouslySetInnerHTML={{ __html: product.shortDescription }}
+            />
           )}
 
           {/* Variant selector + Add to cart */}
@@ -230,6 +233,8 @@ export default async function ProductPage({ params }: Props) {
               basePrice={product.basePrice.toString()}
               isAdmin={session?.user?.role === "ADMIN" || session?.user?.role === "SUPER_ADMIN"}
               masterStockOverrides={masterStockOverrides}
+              productName={product.name}
+              productImage={product.images[0]?.url}
             />
           </div>
 
@@ -237,11 +242,10 @@ export default async function ProductPage({ params }: Props) {
           {product.description && (
             <div className="mt-8 border-t border-black/5 pt-8">
               <h2 className="text-lg font-semibold tracking-tight">Description</h2>
-              <div className="prose mt-4 text-sm text-secondary">
-                {product.description.split("\n").map((paragraph, i) => (
-                  <p key={i}>{paragraph}</p>
-                ))}
-              </div>
+              <div
+                className="prose mt-4 text-sm text-secondary"
+                dangerouslySetInnerHTML={{ __html: product.description }}
+              />
             </div>
           )}
 
