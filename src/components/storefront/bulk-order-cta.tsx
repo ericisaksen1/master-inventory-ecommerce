@@ -43,7 +43,7 @@ export function BulkOrderCta({
             <button
               type="button"
               onClick={() => window.dispatchEvent(new Event("open-bulk-order-popup"))}
-              className="btn-primary rounded-full px-8 py-3 text-sm font-semibold uppercase tracking-wider"
+              className="rounded-full border border-[var(--color-button-border)] bg-[var(--color-button-bg)] px-8 py-3 text-sm font-semibold uppercase tracking-wider text-[var(--color-button-text)] transition-colors hover:bg-[var(--color-button-hover-bg)] hover:text-[var(--color-button-hover-text)]"
             >
               {buttonText || "REQUEST PRICE LIST"}
             </button>

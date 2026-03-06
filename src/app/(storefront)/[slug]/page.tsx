@@ -7,6 +7,7 @@ import type { Metadata } from "next"
 
 interface Props {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ sort?: string; minPrice?: string; maxPrice?: string; category?: string }>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -24,8 +25,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function CmsPage({ params }: Props) {
+export default async function CmsPage({ params, searchParams }: Props) {
   const { slug } = await params
+  const sp = await searchParams
 
   const page = await prisma.page.findUnique({
     where: { slug, isActive: true },
@@ -45,7 +47,7 @@ export default async function CmsPage({ params }: Props) {
           dangerouslySetInnerHTML={{ __html: safeContent }}
         />
       </div>
-      <PageComponents pageId={page.id} />
+      <PageComponents pageId={page.id} searchParams={sp} />
     </>
   )
 }

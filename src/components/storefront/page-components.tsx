@@ -43,9 +43,10 @@ function extractColors(s: Record<string, any>): ComponentColorProps {
 
 interface PageComponentsProps {
   pageId: string | null
+  searchParams?: { sort?: string; minPrice?: string; maxPrice?: string; category?: string }
 }
 
-export async function PageComponents({ pageId }: PageComponentsProps) {
+export async function PageComponents({ pageId, searchParams }: PageComponentsProps) {
   const [components, settings] = await Promise.all([
     prisma.pageComponent.findMany({
       where: { pageId, isActive: true },
@@ -523,6 +524,7 @@ export async function PageComponents({ pageId }: PageComponentsProps) {
               }}
             >
               <ProductListing
+                searchParams={searchParams}
                 heading={settings.heading || "All Products"}
                 showFilters={settings.showFilters ?? true}
                 showSort={settings.showSort ?? true}

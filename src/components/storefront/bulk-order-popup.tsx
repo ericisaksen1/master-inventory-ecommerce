@@ -196,23 +196,14 @@ export function BulkOrderPopup({ enabled, delaySeconds, showAfterEntry }: BulkOr
               <button
                 type="submit"
                 disabled={isPending}
-                className="flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors hover:opacity-90 disabled:opacity-50"
-                style={{
-                  backgroundColor: "var(--color-primary, #00ff41)",
-                  color: "#000000",
-                }}
+                className="flex-1 rounded-lg border border-[var(--color-button-border)] bg-[var(--color-button-bg)] px-4 py-2.5 text-sm font-medium text-[var(--color-button-text)] transition-colors hover:bg-[var(--color-button-hover-bg)] hover:text-[var(--color-button-hover-text)] disabled:opacity-50"
               >
                 {isPending ? "Sending..." : "Request Price List"}
               </button>
               <button
                 type="button"
                 onClick={handleDismiss}
-                className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors hover:opacity-80"
-                style={{
-                  backgroundColor: "transparent",
-                  color: "var(--color-foreground)",
-                  borderColor: "var(--color-border, #d1d5db)",
-                }}
+                className="flex-1 rounded-lg border border-[var(--color-border,#d1d5db)] bg-transparent px-4 py-2.5 text-sm font-medium text-[var(--color-foreground)] transition-colors hover:bg-[var(--color-muted)]"
               >
                 No thanks
               </button>
