@@ -35,8 +35,8 @@ export async function verifyTurnstileToken(token: string | null): Promise<Turnst
 
     return { success: false, error: "Captcha verification failed. Please try again." }
   } catch {
-    // Fail open if Cloudflare is unreachable
+    // Fail closed if Cloudflare is unreachable
     console.error("Turnstile verification request failed")
-    return { success: true }
+    return { success: false, error: "Captcha verification unavailable. Please try again later." }
   }
 }

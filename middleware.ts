@@ -7,6 +7,26 @@ const { auth } = NextAuth(authConfig)
 export default auth(async function middleware(req) {
   const response = NextResponse.next()
 
+  // Content Security Policy
+  const csp = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob: https://picsum.photos https://fastly.picsum.photos https://labratsco.com https://www.labratsco.com",
+    "font-src 'self'",
+    "connect-src 'self' https://challenges.cloudflare.com https://*.sentry.io",
+    "frame-src https://challenges.cloudflare.com",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+  ].join("; ")
+
+  response.headers.set("Content-Security-Policy", csp)
+  response.headers.set("X-Content-Type-Options", "nosniff")
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin")
+  response.headers.set("X-Frame-Options", "DENY")
+
   // Affiliate link tracking
   const refCode = req.nextUrl.searchParams.get("ref")
   if (refCode) {
