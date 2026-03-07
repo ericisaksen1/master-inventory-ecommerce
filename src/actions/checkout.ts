@@ -69,7 +69,7 @@ export async function createOrder(formData: FormData) {
   }
 
   const paymentMethod = formData.get("paymentMethod") as PaymentMethod
-  if (!["PAYPAL", "VENMO", "CASHAPP", "BITCOIN"].includes(paymentMethod)) {
+  if (!["PAYPAL", "VENMO", "CASHAPP", "BITCOIN", "ZELLE"].includes(paymentMethod)) {
     return { error: "Please select a payment method" }
   }
 

@@ -11,6 +11,7 @@ const SETTINGS_FORM_KEYS = [
   "enable_venmo", "venmo_username", "venmo_qr_url",
   "enable_cashapp", "cashapp_tag", "cashapp_qr_url",
   "enable_bitcoin", "bitcoin_address", "bitcoin_qr_url",
+  "enable_zelle", "zelle_email", "zelle_qr_url",
   "tax_rate", "shipping_flat_rate",
   "default_commission_rate", "affiliate_discount_rate",
   "parent_commission_rate", "affiliate_cookie_days",
@@ -46,9 +47,7 @@ const SETTINGS_FORM_KEYS = [
 
 // Sensitive keys only SUPER_ADMIN should see
 const SENSITIVE_KEYS = [
-  "shipstation_api_key", "shipstation_carrier_ids",
-  "ship_from_name", "ship_from_street", "ship_from_city",
-  "ship_from_state", "ship_from_zip", "ship_from_phone",
+  "shipstation_auth_key",
   "email_smtp_host", "email_smtp_port", "email_smtp_user", "email_smtp_password",
   "email_resend_api_key", "email_sendgrid_api_key",
   "entry_popup_enabled", "entry_popup_show_logo", "entry_popup_headline",

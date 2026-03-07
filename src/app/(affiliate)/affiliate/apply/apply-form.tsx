@@ -75,6 +75,7 @@ export function AffiliateApplyForm({ isLoggedIn }: AffiliateApplyFormProps) {
           <option value="VENMO">Venmo</option>
           <option value="CASHAPP">Cash App</option>
           <option value="BITCOIN">Bitcoin</option>
+          <option value="ZELLE">Zelle</option>
         </select>
       </div>
       <Button type="submit" disabled={isPending} className="w-full">

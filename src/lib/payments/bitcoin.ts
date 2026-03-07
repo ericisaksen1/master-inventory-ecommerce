@@ -7,11 +7,12 @@ export class BitcoinPaymentProvider implements PaymentProvider {
   async getInstructions(orderNumber: string, amount: string): Promise<PaymentInstructions> {
     const address = await getSetting("bitcoin_address")
     const qrUrl = await getSetting("bitcoin_qr_url")
+    const adminEmail = await getSetting("admin_notification_email")
 
     return {
       method: this.method,
       displayName: "Bitcoin",
-      instructions: `Send the equivalent of $${amount} USD in Bitcoin to the address below. Include your order number as a reference if possible.`,
+      instructions: `Send the equivalent of $${amount} USD in Bitcoin to the address below. Include your order number as a reference if possible. Please email ${adminEmail || "us"} with proof of payment.`,
       address: address || "Not configured",
       qrCodeUrl: qrUrl || undefined,
       additionalFields: [

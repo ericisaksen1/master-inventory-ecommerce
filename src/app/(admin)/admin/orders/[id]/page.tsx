@@ -35,8 +35,6 @@ export default async function AdminOrderDetailPage({ params }: Props) {
         carrier: order.shippingLabel.carrier,
         service: order.shippingLabel.service,
         trackingNumber: order.shippingLabel.trackingNumber,
-        labelUrl: order.shippingLabel.labelUrl,
-        rate: order.shippingLabel.rate.toString(),
       }
     : null
 

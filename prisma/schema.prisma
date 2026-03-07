@@ -36,6 +36,7 @@ enum PaymentMethod {
   VENMO
   CASHAPP
   BITCOIN
+  ZELLE
   STRIPE
   CREDIT_CARD
   EXTERNAL

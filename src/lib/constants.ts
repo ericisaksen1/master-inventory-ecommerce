@@ -9,6 +9,7 @@ export const PAYMENT_METHODS = {
   VENMO: { label: "Venmo", icon: "venmo" },
   CASHAPP: { label: "Cash App", icon: "cashapp" },
   BITCOIN: { label: "Bitcoin", icon: "bitcoin" },
+  ZELLE: { label: "Zelle", icon: "zelle" },
   STRIPE: { label: "Credit Card", icon: "credit-card" },
   CREDIT_CARD: { label: "Credit Card", icon: "credit-card" },
 } as const

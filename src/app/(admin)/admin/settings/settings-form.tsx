@@ -82,6 +82,15 @@ const settingGroups: {
     ],
   },
   {
+    title: "Zelle",
+    tab: "payment",
+    enableKey: "enable_zelle",
+    fields: [
+      { key: "zelle_email", label: "Zelle Email or Phone", type: "text", placeholder: "you@example.com" },
+      { key: "zelle_qr_url", label: "Zelle QR Code URL (optional)", type: "text", placeholder: "https://..." },
+    ],
+  },
+  {
     title: "Rates",
     tab: "shipping",
     fields: [
@@ -102,22 +111,60 @@ const settingGroups: {
     ],
   },
   {
-    title: "Shipping (ShipStation)",
+    title: "ShipStation Integration",
     tab: "shipping",
     superAdminOnly: true,
-    description: "Configure ShipStation for shipping label generation (UPS, FedEx, USPS).",
+    description: "Connect ShipStation using the Custom Store integration. Orders with payment complete will be exported automatically. In ShipStation, add a Custom Store and set the export/shipnotify URLs to your site's /api/shipstation endpoint.",
     fields: [
-      { key: "shipstation_api_key", label: "ShipStation API Key", type: "password" },
-      { key: "shipstation_carrier_ids", label: "Carrier IDs (comma-separated)", type: "text", placeholder: "se-123456,se-789012" },
-      { key: "ship_from_name", label: "Ship From Name", type: "text", placeholder: "Your Store" },
-      { key: "ship_from_street", label: "Ship From Street", type: "text", placeholder: "123 Main St" },
-      { key: "ship_from_city", label: "Ship From City", type: "text", placeholder: "City" },
-      { key: "ship_from_state", label: "Ship From State", type: "text", placeholder: "CA" },
-      { key: "ship_from_zip", label: "Ship From ZIP", type: "text", placeholder: "90210" },
-      { key: "ship_from_phone", label: "Ship From Phone", type: "text", placeholder: "555-555-5555" },
+      { key: "shipstation_auth_key", label: "Auth Key", type: "generate-key" },
     ],
   },
 ]
+
+function generateAuthKey() {
+  const chars = "abcdef0123456789"
+  const segments = Array.from({ length: 5 }, () =>
+    Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join("")
+  )
+  return `SS-${segments.join("-")}`
+}
+
+function GenerateKeyField({ fieldKey, label, defaultValue }: { fieldKey: string; label: string; defaultValue: string }) {
+  const [value, setValue] = useState(defaultValue)
+  const [copied, setCopied] = useState(false)
+
+  return (
+    <div>
+      <label className="mb-1 block text-sm font-medium">{label}</label>
+      <div className="flex gap-2">
+        <input
+          name={`setting_${fieldKey}`}
+          type="text"
+          readOnly
+          value={value}
+          className="flex-1 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 font-mono text-sm"
+        />
+        <button
+          type="button"
+          onClick={() => { setValue(generateAuthKey()); setCopied(false) }}
+          className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium hover:bg-gray-50"
+        >
+          Generate
+        </button>
+        {value && (
+          <button
+            type="button"
+            onClick={() => { navigator.clipboard.writeText(value); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
+            className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium hover:bg-gray-50"
+          >
+            {copied ? "Copied!" : "Copy"}
+          </button>
+        )}
+      </div>
+      <p className="mt-1 text-xs text-gray-500">Generate a key, copy it, then paste it into ShipStation when setting up the Custom Store.</p>
+    </div>
+  )
+}
 
 export function SettingsForm({ settings, isSuperAdmin }: SettingsFormProps) {
   const [isPending, startTransition] = useTransition()
@@ -239,16 +286,25 @@ export function SettingsForm({ settings, isSuperAdmin }: SettingsFormProps) {
             )}
             <div className={`mt-4 space-y-4 ${isToggleable && !isEnabled ? "pointer-events-none opacity-40" : ""}`}>
               {group.fields.map((field) => (
-                <Input
-                  key={field.key}
-                  label={field.label}
-                  name={`setting_${field.key}`}
-                  type={field.type || "text"}
-                  defaultValue={settings[field.key] || ""}
-                  placeholder={field.placeholder}
-                  min={field.min}
-                  max={field.max}
-                />
+                field.type === "generate-key" ? (
+                  <GenerateKeyField
+                    key={field.key}
+                    fieldKey={field.key}
+                    label={field.label}
+                    defaultValue={settings[field.key] || ""}
+                  />
+                ) : (
+                  <Input
+                    key={field.key}
+                    label={field.label}
+                    name={`setting_${field.key}`}
+                    type={field.type || "text"}
+                    defaultValue={settings[field.key] || ""}
+                    placeholder={field.placeholder}
+                    min={field.min}
+                    max={field.max}
+                  />
+                )
               ))}
             </div>
           </div>

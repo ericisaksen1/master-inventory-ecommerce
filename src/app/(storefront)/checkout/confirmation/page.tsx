@@ -3,7 +3,6 @@ import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
 import { getPaymentProvider } from "@/lib/payments"
 import { formatCurrency } from "@/lib/utils"
-import { PaymentConfirmation } from "./payment-confirmation"
 import Link from "next/link"
 import { CopyOrderNumber } from "./copy-order-number"
 
@@ -103,12 +102,6 @@ export default async function ConfirmationPage({ searchParams }: Props) {
         )}
       </div>
 
-      {/* Confirm Payment Button */}
-      {isPaymentPending && (
-        <div className="mt-6">
-          <PaymentConfirmation orderId={order.id} />
-        </div>
-      )}
 
       {order.payment.status === "SUBMITTED" && (
         <div className="mt-6 rounded-md bg-blue-50 p-4 text-center text-sm text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">

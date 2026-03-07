@@ -13,7 +13,7 @@ export default async function CheckoutPage() {
 
   const [cart, settings] = await Promise.all([
     getCart(),
-    getSettings(["shipping_flat_rate", "tax_rate", "enable_guest_checkout", "enable_paypal", "enable_venmo", "enable_cashapp", "enable_bitcoin", "terms_of_service_content", "store_name"]),
+    getSettings(["shipping_flat_rate", "tax_rate", "enable_guest_checkout", "enable_paypal", "enable_venmo", "enable_cashapp", "enable_bitcoin", "enable_zelle", "terms_of_service_content", "store_name"]),
   ])
 
   const guestCheckoutEnabled = settings.enable_guest_checkout !== "false"
@@ -47,6 +47,7 @@ export default async function CheckoutPage() {
     ...(settings.enable_venmo === "true" ? ["VENMO"] : []),
     ...(settings.enable_cashapp === "true" ? ["CASHAPP"] : []),
     ...(settings.enable_bitcoin === "true" ? ["BITCOIN"] : []),
+    ...(settings.enable_zelle === "true" ? ["ZELLE"] : []),
   ] as string[]
 
   const storeName = settings.store_name || "Store"

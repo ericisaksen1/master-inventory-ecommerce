@@ -14,6 +14,7 @@ const allPaymentMethods = [
   { value: "VENMO", label: "Venmo", description: "Pay via Venmo app", color: "bg-blue-100 text-blue-700" },
   { value: "CASHAPP", label: "Cash App", description: "Pay via Cash App", color: "bg-green-100 text-green-700" },
   { value: "BITCOIN", label: "Bitcoin", description: "Pay with BTC", color: "bg-orange-100 text-orange-700" },
+  { value: "ZELLE", label: "Zelle", description: "Pay via Zelle", color: "bg-purple-100 text-purple-700" },
 ]
 
 interface CartItem {

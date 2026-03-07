@@ -4,12 +4,14 @@ import { PaypalPaymentProvider } from "./paypal"
 import { VenmoPaymentProvider } from "./venmo"
 import { CashAppPaymentProvider } from "./cashapp"
 import { BitcoinPaymentProvider } from "./bitcoin"
+import { ZellePaymentProvider } from "./zelle"
 
 const providers: Partial<Record<PaymentMethod, PaymentProvider>> = {
   PAYPAL: new PaypalPaymentProvider(),
   VENMO: new VenmoPaymentProvider(),
   CASHAPP: new CashAppPaymentProvider(),
   BITCOIN: new BitcoinPaymentProvider(),
+  ZELLE: new ZellePaymentProvider(),
 }
 
 export function getPaymentProvider(method: PaymentMethod): PaymentProvider {
@@ -24,5 +26,6 @@ export function getAvailablePaymentMethods(): { method: PaymentMethod; label: st
     { method: "VENMO", label: "Venmo" },
     { method: "CASHAPP", label: "Cash App" },
     { method: "BITCOIN", label: "Bitcoin" },
+    { method: "ZELLE", label: "Zelle" },
   ]
 }
