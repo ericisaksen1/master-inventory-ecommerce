@@ -44,10 +44,7 @@ export function VariantSelector({
     <div className="space-y-4">
       {Array.from(optionGroups.entries()).map(([optionName, values]) => (
         <div key={optionName}>
-          <label className="block text-sm font-medium text-foreground">
-            {optionName}
-          </label>
-          <div className="mt-2 flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2">
             {Array.from(values).map((value) => {
               const matchingVariant = variants.find((v) => {
                 const opts = v.options as { name: string; value: string }[]

@@ -17,9 +17,9 @@ interface Product {
 export type ProductLayout = "standard" | "compact" | "spacious" | "list"
 
 const gridClasses: Record<ProductLayout, string> = {
-  standard: "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4",
+  standard: "grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4",
   compact: "grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5",
-  spacious: "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3",
+  spacious: "grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-2 xl:grid-cols-3",
   list: "grid grid-cols-1 gap-4",
 }
 

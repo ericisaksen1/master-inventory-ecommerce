@@ -1,11 +1,12 @@
 "use client"
 
-import { useRef, useState, useTransition } from "react"
+import { useState, useTransition } from "react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/toast"
 import { updateSettings } from "@/actions/settings"
 import { fontOptions, themePresets, radiusOptions, shadowOptions } from "@/lib/theme-presets"
 import { RichTextEditor } from "@/components/admin/rich-text-editor"
+import { ImageUploadField } from "@/components/admin/image-upload-field"
 
 interface ThemeFormProps {
   settings: Record<string, string>
@@ -1225,119 +1226,6 @@ function SelectField({
           </option>
         ))}
       </select>
-    </div>
-  )
-}
-
-function ImageUploadField({
-  label,
-  value,
-  onChange,
-  previewClass,
-  accept,
-}: {
-  label: string
-  value: string
-  onChange: (value: string) => void
-  previewClass: string
-  accept: string
-}) {
-  const [preview, setPreview] = useState(value)
-  const [uploading, setUploading] = useState(false)
-  const fileRef = useRef<HTMLInputElement>(null)
-  const { toast } = useToast()
-
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    const localUrl = URL.createObjectURL(file)
-    setPreview(localUrl)
-
-    setUploading(true)
-    try {
-      const formData = new FormData()
-      formData.append("file", file)
-      const res = await fetch("/api/upload", { method: "POST", body: formData })
-      const data = await res.json()
-
-      if (!res.ok) {
-        toast(data.error || "Upload failed", "error")
-        setPreview(value)
-        return
-      }
-
-      onChange(data.url)
-      setPreview(data.url)
-      toast(`${label} uploaded!`)
-    } catch {
-      toast("Upload failed", "error")
-      setPreview(value)
-    } finally {
-      setUploading(false)
-    }
-  }
-
-  function handleRemove() {
-    onChange("")
-    setPreview("")
-    if (fileRef.current) fileRef.current.value = ""
-  }
-
-  return (
-    <div>
-      <label className="mb-1.5 block text-sm font-medium">{label}</label>
-
-      {preview ? (
-        <div className="flex items-center gap-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={preview} alt={label} className={previewClass} />
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => fileRef.current?.click()}
-              className="text-xs font-medium text-gray-600 hover:text-black"
-            >
-              Replace
-            </button>
-            <button
-              type="button"
-              onClick={handleRemove}
-              className="text-xs font-medium text-red-600 hover:text-red-800"
-            >
-              Remove
-            </button>
-          </div>
-        </div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          className="flex w-full items-center justify-center rounded-lg border-2 border-dashed border-gray-300 px-6 py-8 text-center hover:border-gray-400"
-        >
-          <div>
-            <svg
-              className="mx-auto h-8 w-8 text-gray-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={1.5}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
-              />
-            </svg>
-            <p className="mt-2 text-sm font-medium text-gray-600">
-              {uploading ? "Uploading..." : `Click to upload ${label.toLowerCase()}`}
-            </p>
-            <p className="mt-1 text-xs text-gray-400">PNG, JPG, SVG, or ICO. Max 2MB.</p>
-          </div>
-        </button>
-      )}
-
-      <input ref={fileRef} type="file" accept={accept} onChange={handleFileChange} className="hidden" />
     </div>
   )
 }

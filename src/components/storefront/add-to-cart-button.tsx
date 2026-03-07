@@ -47,7 +47,7 @@ export function AddToCartButton({
       return (
         <Link
           href={`/products/${slug}`}
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-product-btn-border)] bg-[var(--color-product-btn-bg)] text-[var(--color-product-btn-text)] transition-all duration-150 hover:bg-[var(--color-product-btn-hover-bg)] hover:text-[var(--color-product-btn-hover-text)]"
+          className="btn-glow flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-product-btn-border)] bg-[var(--color-product-btn-bg)] text-[var(--color-product-btn-text)] transition-all duration-150 hover:bg-[var(--color-product-btn-hover-bg)] hover:text-[var(--color-product-btn-hover-text)]"
           title="View Options"
         >
           {CartIcon}

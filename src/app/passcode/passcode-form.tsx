@@ -22,7 +22,7 @@ export function PasscodeForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="mt-4 w-full rounded-lg bg-foreground px-4 py-3 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50"
+        className="btn-glow mt-4 w-full rounded-[var(--radius)] bg-[var(--color-button-bg)] px-4 py-3 text-sm font-medium text-[var(--color-button-text)] transition-opacity hover:opacity-90 disabled:opacity-50"
       >
         {isPending ? "Verifying..." : "Enter"}
       </button>

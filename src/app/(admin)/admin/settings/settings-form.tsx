@@ -6,6 +6,7 @@ import { Select } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/toast"
 import { updateSettings, sendTestEmail } from "@/actions/settings"
+import { ImageUploadField } from "@/components/admin/image-upload-field"
 
 const RichTextEditor = lazy(() => import("@/components/admin/rich-text-editor").then(m => ({ default: m.RichTextEditor })))
 
@@ -146,6 +147,7 @@ export function SettingsForm({ settings, isSuperAdmin }: SettingsFormProps) {
 
   // Passcode state
   const [passcodeEnabled, setPasscodeEnabled] = useState(settings.storefront_passcode_enabled === "true")
+  const [passcodeBgImage, setPasscodeBgImage] = useState(settings.storefront_passcode_bg_image || "")
 
   // Bulk ordering state
   const [bulkOrderEnabled, setBulkOrderEnabled] = useState(settings.bulk_order_popup_enabled === "true")
@@ -653,6 +655,16 @@ export function SettingsForm({ settings, isSuperAdmin }: SettingsFormProps) {
                   defaultValue={settings.storefront_passcode_value || ""}
                   placeholder="Enter the passcode visitors must use"
                 />
+                <div className="mt-4">
+                  <input type="hidden" name="setting_storefront_passcode_bg_image" value={passcodeBgImage} />
+                  <ImageUploadField
+                    label="Background Image"
+                    description="Displayed on the left side of the passcode screen."
+                    value={passcodeBgImage}
+                    onChange={setPasscodeBgImage}
+                    previewClass="h-20 max-w-[160px] rounded object-cover"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -1080,3 +1092,4 @@ export function SettingsForm({ settings, isSuperAdmin }: SettingsFormProps) {
     </form>
   )
 }
+

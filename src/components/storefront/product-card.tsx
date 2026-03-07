@@ -36,7 +36,8 @@ export function ProductCard({
   isWishlisted,
   reviewData,
 }: ProductCardProps) {
-  const primaryImage = product.images.find((i) => i.isPrimary) || product.images[0]
+  const DEFAULT_IMAGE = { url: "/images/default-product.jpg", alt: "Product image", isPrimary: true }
+  const primaryImage = product.images.find((i) => i.isPrimary) || product.images[0] || DEFAULT_IMAGE
   const isOnSale = product.compareAtPrice && Number(product.compareAtPrice) > Number(product.basePrice)
   const showFromPrefix = product.hasVariantPricing
 
@@ -109,7 +110,7 @@ export function ProductCard({
               )}
               <Link
                 href={`/products/${product.slug}`}
-                className="inline-block rounded-full border border-[var(--color-product-btn-border)] bg-[var(--color-product-btn-bg)] px-5 py-2.5 text-center text-sm font-medium text-[var(--color-product-btn-text)] transition-all duration-150 hover:bg-[var(--color-product-btn-hover-bg)] hover:text-[var(--color-product-btn-hover-text)]"
+                className="btn-glow inline-block rounded-full border border-[var(--color-product-btn-border)] bg-[var(--color-product-btn-bg)] px-5 py-2.5 text-center text-sm font-medium text-[var(--color-product-btn-text)] transition-all duration-150 hover:bg-[var(--color-product-btn-hover-bg)] hover:text-[var(--color-product-btn-hover-text)]"
               >
                 Buy Now
               </Link>
@@ -196,7 +197,7 @@ export function ProductCard({
   if (cardStyle === "boxed") {
     return (
       <div
-        className="group flex h-full flex-col overflow-hidden rounded-2xl p-4"
+        className="group product-card-glow flex h-full flex-col overflow-hidden rounded-2xl p-4"
         style={{
           backgroundColor: "var(--product-card-bg, #f3f4f6)",
           boxShadow: "var(--product-card-shadow, 0 1px 3px rgba(0,0,0,0.1))",
@@ -250,7 +251,7 @@ export function ProductCard({
             )}
             <Link
               href={`/products/${product.slug}`}
-              className="flex-1 rounded-full border border-[var(--color-product-btn-border)] bg-[var(--color-product-btn-bg)] px-5 py-2.5 text-center text-sm font-medium text-[var(--color-product-btn-text)] transition-all duration-150 hover:bg-[var(--color-product-btn-hover-bg)] hover:text-[var(--color-product-btn-hover-text)]"
+              className="btn-glow flex-1 rounded-full border border-[var(--color-product-btn-border)] bg-[var(--color-product-btn-bg)] px-5 py-2.5 text-center text-sm font-medium text-[var(--color-product-btn-text)] transition-all duration-150 hover:bg-[var(--color-product-btn-hover-bg)] hover:text-[var(--color-product-btn-hover-text)]"
             >
               Buy Now
             </Link>
@@ -311,7 +312,7 @@ export function ProductCard({
           )}
           <Link
             href={`/products/${product.slug}`}
-            className="flex-1 rounded-full border border-[var(--color-product-btn-border)] bg-[var(--color-product-btn-bg)] px-5 py-2.5 text-center text-sm font-medium text-[var(--color-product-btn-text)] transition-all duration-150 hover:bg-[var(--color-product-btn-hover-bg)] hover:text-[var(--color-product-btn-hover-text)]"
+            className="btn-glow flex-1 rounded-full border border-[var(--color-product-btn-border)] bg-[var(--color-product-btn-bg)] px-5 py-2.5 text-center text-sm font-medium text-[var(--color-product-btn-text)] transition-all duration-150 hover:bg-[var(--color-product-btn-hover-bg)] hover:text-[var(--color-product-btn-hover-text)]"
           >
             Buy Now
           </Link>

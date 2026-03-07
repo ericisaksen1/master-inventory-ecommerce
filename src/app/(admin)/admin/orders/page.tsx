@@ -27,7 +27,7 @@ export default async function AdminOrdersPage({ searchParams }: Props) {
   const orders = await prisma.order.findMany({
     where,
     orderBy: { createdAt: "desc" },
-    include: { user: true, payment: true },
+    include: { user: true, payment: true, sourceSite: true },
     take: 100,
   })
 
@@ -77,9 +77,9 @@ export default async function AdminOrdersPage({ searchParams }: Props) {
                     >
                       {order.orderNumber}
                     </Link>
-                    {order.sourceSiteId && (
+                    {order.sourceSite && (
                       <span className="ml-2 inline-block rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-700">
-                        Drop-ship
+                        {order.sourceSite.name}
                       </span>
                     )}
                   </td>

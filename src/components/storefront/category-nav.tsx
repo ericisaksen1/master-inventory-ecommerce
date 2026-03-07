@@ -19,7 +19,7 @@ export async function CategoryNav({ activeSlug }: CategoryNavProps) {
         className={cn(
           "rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
           !activeSlug
-            ? "border-primary bg-primary text-white"
+            ? "border-primary bg-primary text-black"
             : "border-gray-300 text-gray-600 hover:border-primary hover:text-primary dark:border-gray-600 dark:text-gray-400 dark:hover:border-primary dark:hover:text-primary"
         )}
       >
@@ -32,7 +32,7 @@ export async function CategoryNav({ activeSlug }: CategoryNavProps) {
           className={cn(
             "rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
             activeSlug === cat.slug
-              ? "border-primary bg-primary text-white"
+              ? "border-primary bg-primary text-black"
               : "border-gray-300 text-gray-600 hover:border-primary hover:text-primary dark:border-gray-600 dark:text-gray-400 dark:hover:border-primary dark:hover:text-primary"
           )}
         >

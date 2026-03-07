@@ -12,8 +12,14 @@ export function ProductGallery({ images }: ProductGalleryProps) {
 
   if (images.length === 0) {
     return (
-      <div className="aspect-square rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400">
-        No images
+      <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
+        <Image
+          src="/images/default-product.jpg"
+          alt="Product image"
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, 50vw"
+        />
       </div>
     )
   }

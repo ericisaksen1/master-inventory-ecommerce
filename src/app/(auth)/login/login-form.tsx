@@ -8,6 +8,9 @@ import { Input } from "@/components/ui/input"
 import { login, loginWithMagicLink } from "@/actions/auth"
 import { Turnstile } from "@/components/ui/turnstile"
 
+const glassInput = "!bg-white/10 !border-white/20 !text-white placeholder:!text-white/40"
+const glassLabel = "[&_label]:!text-white/80"
+
 export function LoginForm() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -43,12 +46,12 @@ export function LoginForm() {
   if (magicLinkSent) {
     return (
       <div className="text-center">
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-white/60">
           Check your email for a magic link to sign in.
         </p>
         <Button
           variant="ghost"
-          className="mt-4"
+          className="mt-4 text-white/60 hover:text-white"
           onClick={() => {
             setMagicLinkSent(false)
             setMode("password")
@@ -63,34 +66,40 @@ export function LoginForm() {
   return (
     <form action={handleSubmit} className="space-y-4">
       {error && (
-        <div className="rounded-md bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/30 dark:text-red-400">
+        <div className="rounded-md bg-red-500/20 p-3 text-sm text-red-300">
           {error}
         </div>
       )}
 
-      <Input
-        label="Email"
-        name="email"
-        type="email"
-        placeholder="you@example.com"
-        required
-        autoComplete="email"
-      />
+      <div className={glassLabel}>
+        <Input
+          label="Email"
+          name="email"
+          type="email"
+          placeholder="you@example.com"
+          required
+          autoComplete="email"
+          className={glassInput}
+        />
+      </div>
 
       {mode === "password" && (
         <>
-          <Input
-            label="Password"
-            name="password"
-            type="password"
-            placeholder="Your password"
-            required
-            autoComplete="current-password"
-          />
+          <div className={glassLabel}>
+            <Input
+              label="Password"
+              name="password"
+              type="password"
+              placeholder="Your password"
+              required
+              autoComplete="current-password"
+              className={glassInput}
+            />
+          </div>
           <div className="text-right">
             <Link
               href="/forgot-password"
-              className="text-sm text-gray-500 hover:text-primary"
+              className="text-sm text-white/60 hover:text-white"
             >
               Forgot password?
             </Link>
@@ -110,17 +119,17 @@ export function LoginForm() {
 
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-200 dark:border-gray-600" />
+          <div className="w-full border-t border-white/20" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-white px-2 text-gray-500 dark:bg-gray-800 dark:text-gray-400">or</span>
+          <span className="px-2 text-white/40">or</span>
         </div>
       </div>
 
       <Button
         type="button"
         variant="outline"
-        className="w-full"
+        className="w-full !border-white/20 !text-white hover:!bg-white/10"
         onClick={() => setMode(mode === "password" ? "magic" : "password")}
       >
         {mode === "password"

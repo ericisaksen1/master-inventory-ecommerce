@@ -108,6 +108,7 @@ const SUPER_ADMIN_ONLY_KEYS = new Set([
   "printful_webhook_secret",
   "storefront_passcode_enabled",
   "storefront_passcode_value",
+  "storefront_passcode_bg_image",
   "bulk_order_popup_enabled",
   "bulk_order_popup_delay",
   "bulk_order_show_after_entry",

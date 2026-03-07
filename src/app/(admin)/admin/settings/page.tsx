@@ -63,7 +63,7 @@ const SENSITIVE_KEYS = [
   // Printful
   "printful_api_key", "printful_webhook_secret",
   // Passcode
-  "storefront_passcode_enabled", "storefront_passcode_value",
+  "storefront_passcode_enabled", "storefront_passcode_value", "storefront_passcode_bg_image",
   // Bulk Ordering
   "bulk_order_popup_enabled", "bulk_order_popup_delay",
   "bulk_order_show_after_entry", "bulk_order_pdf_url",

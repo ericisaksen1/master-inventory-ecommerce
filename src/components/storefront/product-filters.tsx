@@ -8,6 +8,7 @@ interface ProductFiltersProps {
   currentCategory?: string
   currentMinPrice?: string
   currentMaxPrice?: string
+  currentOnSale?: string
   basePath?: string
 }
 
@@ -16,6 +17,7 @@ export function ProductFilters({
   currentCategory,
   currentMinPrice,
   currentMaxPrice,
+  currentOnSale,
   basePath = "/products",
 }: ProductFiltersProps) {
   const router = useRouter()
@@ -23,8 +25,9 @@ export function ProductFilters({
   const [minPrice, setMinPrice] = useState(currentMinPrice || "")
   const [maxPrice, setMaxPrice] = useState(currentMaxPrice || "")
   const [category, setCategory] = useState(currentCategory || "")
+  const [onSale, setOnSale] = useState(currentOnSale === "true")
 
-  const hasFilters = currentCategory || currentMinPrice || currentMaxPrice
+  const hasFilters = currentCategory || currentMinPrice || currentMaxPrice || currentOnSale
 
   function applyFilters() {
     const params = new URLSearchParams(searchParams.toString())
@@ -34,6 +37,8 @@ export function ProductFilters({
     else params.delete("maxPrice")
     if (category) params.set("category", category)
     else params.delete("category")
+    if (onSale) params.set("onSale", "true")
+    else params.delete("onSale")
     router.push(`${basePath}?${params.toString()}`)
   }
 
@@ -42,9 +47,11 @@ export function ProductFilters({
     params.delete("minPrice")
     params.delete("maxPrice")
     params.delete("category")
+    params.delete("onSale")
     setMinPrice("")
     setMaxPrice("")
     setCategory("")
+    setOnSale(false)
     router.push(`${basePath}?${params.toString()}`)
   }
 
@@ -89,6 +96,15 @@ export function ProductFilters({
           className="h-9 w-24 rounded-md border border-border bg-background px-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/25"
         />
       </div>
+      <label className="flex h-9 cursor-pointer items-center gap-2 self-end">
+        <input
+          type="checkbox"
+          checked={onSale}
+          onChange={(e) => setOnSale(e.target.checked)}
+          className="h-4 w-4 rounded border-border accent-primary"
+        />
+        <span className="text-sm font-medium text-secondary">On Sale</span>
+      </label>
       <button
         type="button"
         onClick={applyFilters}

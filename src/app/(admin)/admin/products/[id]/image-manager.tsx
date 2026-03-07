@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/toast"
 import { addProductImage, deleteProductImage } from "@/actions/products"
+import { ImagePickerModal } from "@/components/admin/image-picker-modal"
 
 interface Image {
   id: string
@@ -21,7 +22,8 @@ interface ImageManagerProps {
 
 export function ImageManager({ productId, images }: ImageManagerProps) {
   const [showForm, setShowForm] = useState(false)
-  const [addMode, setAddMode] = useState<"upload" | "url">("upload")
+  const [addMode, setAddMode] = useState<"upload" | "url" | "library">("upload")
+  const [pickerOpen, setPickerOpen] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [isPending, startTransition] = useTransition()
   const { toast } = useToast()
@@ -77,6 +79,21 @@ export function ImageManager({ productId, images }: ImageManagerProps) {
     }
   }
 
+  async function handleLibrarySelect(url: string) {
+    if (!url) return
+    const formData = new FormData()
+    formData.set("url", url)
+    formData.set("alt", "")
+    const result = await addProductImage(productId, formData)
+    if (result?.error) {
+      toast(result.error, "error")
+    } else {
+      toast("Image added from library!")
+      setShowForm(false)
+      router.refresh()
+    }
+  }
+
   function handleDelete(imageId: string) {
     if (!confirm("Delete this image?")) return
     startTransition(async () => {
@@ -112,6 +129,17 @@ export function ImageManager({ productId, images }: ImageManagerProps) {
               }`}
             >
               Upload File
+            </button>
+            <button
+              type="button"
+              onClick={() => setAddMode("library")}
+              className={`rounded px-3 py-1 text-xs font-medium ${
+                addMode === "library"
+                  ? "bg-foreground text-background"
+                  : "bg-muted text-secondary hover:bg-muted/80"
+              }`}
+            >
+              Media Library
             </button>
             <button
               type="button"
@@ -151,6 +179,22 @@ export function ImageManager({ productId, images }: ImageManagerProps) {
                   className="hidden"
                 />
               </div>
+            </div>
+          ) : addMode === "library" ? (
+            <div className="space-y-3">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => setPickerOpen(true)}
+              >
+                Browse Media Library
+              </Button>
+              <ImagePickerModal
+                isOpen={pickerOpen}
+                onClose={() => setPickerOpen(false)}
+                onSelect={handleLibrarySelect}
+              />
             </div>
           ) : (
             <form action={handleAdd} className="space-y-3">

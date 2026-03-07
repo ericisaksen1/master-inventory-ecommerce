@@ -9,7 +9,7 @@ import type { ProductLayout } from "@/components/storefront/product-grid"
 import type { ProductCardStyle } from "@/components/storefront/product-card"
 
 interface ProductListingProps {
-  searchParams?: { sort?: string; minPrice?: string; maxPrice?: string; category?: string }
+  searchParams?: { sort?: string; minPrice?: string; maxPrice?: string; category?: string; onSale?: string }
   heading?: string
   basePath?: string
   showFilters?: boolean
@@ -63,6 +63,9 @@ export async function ProductListing({
   }
   if (params.category) {
     where.categories = { some: { category: { slug: params.category } } }
+  }
+  if (params.onSale === "true") {
+    where.compareAtPrice = { not: null, gt: 0 }
   }
 
   // Fetch categories for filter UI
@@ -141,6 +144,7 @@ export async function ProductListing({
           currentCategory={params.category}
           currentMinPrice={params.minPrice}
           currentMaxPrice={params.maxPrice}
+          currentOnSale={params.onSale}
           basePath={basePath}
         />
       )}

@@ -11,9 +11,9 @@ export default auth(async function middleware(req) {
   const csp = [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com",
-    "style-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: blob: https://picsum.photos https://fastly.picsum.photos https://labratsco.com https://www.labratsco.com",
-    "font-src 'self'",
+    "font-src 'self' https://fonts.gstatic.com",
     "connect-src 'self' https://challenges.cloudflare.com https://*.sentry.io",
     "frame-src https://challenges.cloudflare.com",
     "object-src 'none'",

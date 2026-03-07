@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Master SKU — Linking Enoch to Lab Rats</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #0a0a0a;
+    color: #e5e5e5;
+    line-height: 1.7;
+    padding: 3rem 1.5rem;
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.02em;
+  }
+
+  h1 span {
+    color: #4ade80;
+  }
+
+  .subtitle {
+    font-size: 1.1rem;
+    color: #a3a3a3;
+    margin-bottom: 3rem;
+    border-bottom: 1px solid #262626;
+    padding-bottom: 2rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #262626;
+    letter-spacing: -0.01em;
+  }
+
+  h2:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
+
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #d4d4d4;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  p { margin-bottom: 1rem; color: #a3a3a3; }
+
+  strong { color: #e5e5e5; font-weight: 600; }
+
+  a { color: #4ade80; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Architecture diagram */
+  .diagram {
+    background: #111;
+    border: 1px solid #262626;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+  }
+
+  .diagram pre {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: #4ade80;
+    line-height: 1.5;
+    white-space: pre;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.9rem;
+  }
+
+  th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    background: #161616;
+    color: #4ade80;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #262626;
+  }
+
+  td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #1a1a1a;
+    color: #a3a3a3;
+  }
+
+  tr:hover td { background: #111; }
+
+  td code {
+    background: #1a1a1a;
+    color: #4ade80;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+  }
+
+  /* Code blocks */
+  pre {
+    background: #111;
+    border: 1px solid #262626;
+    border-radius: 10px;
+    padding: 1.25rem;
+    margin: 1rem 0 1.5rem;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: #d4d4d4;
+  }
+
+  pre .comment { color: #525252; }
+  pre .keyword { color: #c084fc; }
+  pre .string { color: #4ade80; }
+  pre .key { color: #60a5fa; }
+  pre .number { color: #fb923c; }
+
+  /* Inline code */
+  code {
+    background: #1a1a1a;
+    color: #4ade80;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em;
+  }
+
+  /* Ordered / unordered lists */
+  ol, ul {
+    margin: 0.75rem 0 1.5rem 1.5rem;
+    color: #a3a3a3;
+  }
+
+  li {
+    margin-bottom: 0.5rem;
+    padding-left: 0.25rem;
+  }
+
+  li strong { color: #e5e5e5; }
+
+  /* Steps */
+  .step {
+    background: #111;
+    border: 1px solid #262626;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+
+  .step-number {
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    text-align: center;
+    background: #4ade80;
+    color: #0a0a0a;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 0.8rem;
+    margin-right: 0.5rem;
+  }
+
+  .step h3 {
+    display: inline;
+    margin: 0;
+    color: #fff;
+  }
+
+  .step p { margin-top: 0.75rem; }
+
+  /* Callout boxes */
+  .callout {
+    background: #0f1a0f;
+    border: 1px solid #1a3a1a;
+    border-left: 3px solid #4ade80;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin: 1.5rem 0;
+    font-size: 0.9rem;
+  }
+
+  .callout p { color: #86efac; margin: 0; }
+
+  /* Endpoint cards */
+  .endpoint {
+    background: #111;
+    border: 1px solid #262626;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+
+  .endpoint-method {
+    display: inline-block;
+    background: #4ade80;
+    color: #0a0a0a;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 0.75rem;
+    margin-right: 0.5rem;
+  }
+
+  .endpoint-path {
+    font-family: 'JetBrains Mono', monospace;
+    color: #fff;
+    font-size: 0.95rem;
+  }
+
+  .endpoint-desc {
+    color: #737373;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+
+  /* Quick ref */
+  .quick-ref {
+    background: #111;
+    border: 1px solid #262626;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+
+  .quick-ref dt {
+    color: #737373;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 0.75rem;
+  }
+
+  .quick-ref dt:first-child { margin-top: 0; }
+
+  .quick-ref dd {
+    color: #e5e5e5;
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .quick-ref dd code {
+    font-size: 0.85rem;
+  }
+
+  /* Badge */
+  .badge {
+    display: inline-block;
+    background: #1a2e1a;
+    color: #4ade80;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  @media (max-width: 640px) {
+    body { padding: 1.5rem 1rem; }
+    h1 { font-size: 1.75rem; }
+    pre { font-size: 0.7rem; padding: 1rem; }
+    .diagram pre { font-size: 0.65rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <h1>Master SKU <span>&#8212;</span> Linking Enoch to Lab Rats</h1>
+  <p class="subtitle">Lab Rats is the <strong>master inventory hub</strong>. Connected sites (like Enoch) reference Lab Rats master SKUs so that stock is tracked centrally and orders are forwarded for fulfillment.</p>
+
+  <!-- ── Architecture ── -->
+  <h2>Architecture Overview</h2>
+
+  <div class="diagram"><pre>
+┌──────────────────────┐              ┌──────────────────────────┐
+│      ENOCH-2026      │              │      LABRATS-2026        │
+│   (connected site)   │              │   (master inventory)     │
+│                      │              │                          │
+│  Product.masterSku ──┼──── API ────┼──► MasterSku.sku          │
+│  "MSKU-BPC-157-10MG" │              │    "MSKU-BPC-157-10MG"   │
+│                      │              │         │                │
+│                      │              │    MasterSkuLink          │
+│                      │              │    ├─ productId (local)  │
+│                      │              │    └─ siteId + remoteRef │
+└──────────────────────┘              └──────────────────────────┘</pre></div>
+
+  <h3>Key Tables</h3>
+
+  <table>
+    <thead>
+      <tr><th>Site</th><th>Table</th><th>Purpose</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Lab Rats</strong></td>
+        <td><code>MasterSku</code></td>
+        <td>Central SKU with <code>sku</code>, <code>name</code>, <code>stock</code></td>
+      </tr>
+      <tr>
+        <td><strong>Lab Rats</strong></td>
+        <td><code>MasterSkuLink</code></td>
+        <td>Links a master SKU to a local product (<code>productId</code>) or to a remote site product (<code>siteId</code> + <code>remoteRef</code>)</td>
+      </tr>
+      <tr>
+        <td><strong>Lab Rats</strong></td>
+        <td><code>ConnectedSite</code></td>
+        <td>Registered external sites with <code>name</code>, <code>domain</code>, <code>apiKey</code></td>
+      </tr>
+      <tr>
+        <td><strong>Enoch</strong></td>
+        <td><code>Product.masterSku</code></td>
+        <td>Simple string field storing the master SKU code (e.g. <code>MSKU-BPC-157-10MG</code>)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ── How it works ── -->
+  <h2>How It Works at Checkout</h2>
+
+  <ol>
+    <li><strong>Enoch checkout</strong> checks if a cart item's product has a <code>masterSku</code> value</li>
+    <li>If yes, Enoch calls <code>POST /api/inventory/check</code> on Lab Rats to verify stock</li>
+    <li>After payment, Enoch calls <code>POST /api/inventory/orders</code> to forward the order</li>
+    <li>Lab Rats decrements <code>MasterSku.stock</code>, creates a drop-ship order, and notifies admins</li>
+  </ol>
+
+  <!-- ── Step by step ── -->
+  <h2>Step-by-Step: Linking a New Product</h2>
+
+  <div class="step">
+    <span class="step-number">1</span>
+    <h3>Create the Master SKU on Lab Rats</h3>
+    <p><strong>Admin UI:</strong> Go to <code>/admin/inventory</code> &rarr; <strong>New Master SKU</strong></p>
+    <ul>
+      <li><strong>SKU</strong>: Use the convention <code>MSKU-PRODUCT-NAME</code> (uppercase, hyphens). Example: <code>MSKU-BPC-157-10MG</code></li>
+      <li><strong>Name</strong>: The product name (e.g. <code>BPC-157 10mg</code>)</li>
+      <li><strong>Stock</strong>: Set initial inventory count</li>
+    </ul>
+    <p><strong>Or via script:</strong></p>
+<pre><span class="keyword">await</span> prisma.masterSku.<span class="key">create</span>({
+  <span class="key">data</span>: {
+    <span class="key">sku</span>: <span class="string">"MSKU-BPC-157-10MG"</span>,
+    <span class="key">name</span>: <span class="string">"BPC-157 10mg"</span>,
+    <span class="key">stock</span>: <span class="number">100</span>,
+    <span class="key">isActive</span>: <span class="keyword">true</span>,
+  },
+})</pre>
+  </div>
+
+  <div class="step">
+    <span class="step-number">2</span>
+    <h3>Link it to the Lab Rats local product</h3>
+    <p><strong>Admin UI:</strong> Go to the product edit page &rarr; <strong>Master Inventory</strong> section &rarr; <strong>+ Link SKU</strong> &rarr; select the master SKU</p>
+    <p>This creates a <code>MasterSkuLink</code> with <code>productId</code> set and <code>siteId</code> = null (meaning it's a local link).</p>
+    <p><strong>Or via script:</strong></p>
+<pre><span class="keyword">await</span> prisma.masterSkuLink.<span class="key">create</span>({
+  <span class="key">data</span>: {
+    <span class="key">masterSkuId</span>: <span class="string">"&lt;master-sku-id&gt;"</span>,
+    <span class="key">productId</span>: <span class="string">"&lt;labrats-product-id&gt;"</span>,
+    <span class="key">quantityMultiplier</span>: <span class="number">1</span>,
+  },
+})</pre>
+  </div>
+
+  <div class="step">
+    <span class="step-number">3</span>
+    <h3>Set the Master SKU on the Enoch product</h3>
+    <p><strong>Admin UI (Enoch):</strong> Go to the product edit page &rarr; fill in the <strong>Master SKU</strong> field with the exact SKU string (e.g. <code>MSKU-BPC-157-10MG</code>)</p>
+    <p><strong>Or via script (run from enoch-2026):</strong></p>
+<pre><span class="keyword">await</span> prisma.product.<span class="key">update</span>({
+  <span class="key">where</span>: { <span class="key">id</span>: <span class="string">"&lt;enoch-product-id&gt;"</span> },
+  <span class="key">data</span>: { <span class="key">masterSku</span>: <span class="string">"MSKU-BPC-157-10MG"</span> },
+})</pre>
+  </div>
+
+  <div class="step">
+    <span class="step-number">4</span>
+    <h3>Optional: Create a remote link on Lab Rats</h3>
+    <p>This is used for resolving Enoch product IDs back to master SKUs on the Lab Rats side:</p>
+<pre><span class="keyword">await</span> prisma.masterSkuLink.<span class="key">create</span>({
+  <span class="key">data</span>: {
+    <span class="key">masterSkuId</span>: <span class="string">"&lt;master-sku-id&gt;"</span>,
+    <span class="key">siteId</span>: <span class="string">"&lt;connected-site-id&gt;"</span>,        <span class="comment">// Enoch's ConnectedSite.id</span>
+    <span class="key">remoteRef</span>: <span class="string">"&lt;enoch-product-id&gt;"</span>,       <span class="comment">// Enoch's Product.id</span>
+    <span class="key">quantityMultiplier</span>: <span class="number">1</span>,
+  },
+})</pre>
+  </div>
+
+  <!-- ── Env vars ── -->
+  <h2>Environment Variables (Enoch)</h2>
+
+  <p>In <code>enoch-2026/.env</code>:</p>
+
+<pre><span class="key">MASTER_INVENTORY_API_URL</span>=<span class="string">"http://localhost:4567/api/inventory"</span>
+<span class="key">MASTER_INVENTORY_API_KEY</span>=<span class="string">"&lt;api-key-matching-ConnectedSite.apiKey&gt;"</span></pre>
+
+  <div class="callout">
+    <p>For production, replace <code>localhost:4567</code> with the Lab Rats domain.</p>
+  </div>
+
+  <!-- ── API ── -->
+  <h2>API Endpoints (Lab Rats)</h2>
+
+  <div class="endpoint">
+    <div>
+      <span class="endpoint-method">POST</span>
+      <span class="endpoint-path">/api/inventory/check</span>
+    </div>
+    <p class="endpoint-desc">Check stock availability before checkout.</p>
+<pre><span class="comment">// Request</span>
+{
+  <span class="key">"items"</span>: [
+    { <span class="key">"sku"</span>: <span class="string">"MSKU-BPC-157-10MG"</span>, <span class="key">"quantity"</span>: <span class="number">2</span> }
+  ]
+}
+
+<span class="comment">// Response</span>
+{
+  <span class="key">"items"</span>: [
+    { <span class="key">"sku"</span>: <span class="string">"MSKU-BPC-157-10MG"</span>, <span class="key">"available"</span>: <span class="number">50</span>, <span class="key">"sufficient"</span>: <span class="keyword">true</span> }
+  ]
+}</pre>
+  </div>
+
+  <div class="endpoint">
+    <div>
+      <span class="endpoint-method">POST</span>
+      <span class="endpoint-path">/api/inventory/orders</span>
+    </div>
+    <p class="endpoint-desc">Forward a completed order for drop-ship fulfillment. Decrements stock and creates an order on Lab Rats.</p>
+<pre><span class="comment">// Request</span>
+{
+  <span class="key">"orderNumber"</span>: <span class="string">"ORD-1234"</span>,
+  <span class="key">"customer"</span>: {
+    <span class="key">"email"</span>: <span class="string">"..."</span>,
+    <span class="key">"firstName"</span>: <span class="string">"..."</span>,
+    <span class="key">"lastName"</span>: <span class="string">"..."</span>
+  },
+  <span class="key">"shippingAddress"</span>: {
+    <span class="key">"firstName"</span>: <span class="string">"..."</span>,
+    <span class="key">"lastName"</span>: <span class="string">"..."</span>,
+    <span class="key">"line1"</span>: <span class="string">"..."</span>,
+    <span class="key">"city"</span>: <span class="string">"..."</span>,
+    <span class="key">"state"</span>: <span class="string">"..."</span>,
+    <span class="key">"postalCode"</span>: <span class="string">"..."</span>
+  },
+  <span class="key">"items"</span>: [{
+    <span class="key">"masterSku"</span>: <span class="string">"MSKU-BPC-157-10MG"</span>,
+    <span class="key">"name"</span>: <span class="string">"BPC-157 10mg"</span>,
+    <span class="key">"quantity"</span>: <span class="number">1</span>,
+    <span class="key">"price"</span>: <span class="number">49.99</span>,
+    <span class="key">"total"</span>: <span class="number">49.99</span>
+  }],
+  <span class="key">"subtotal"</span>: <span class="number">49.99</span>,
+  <span class="key">"tax"</span>: <span class="number">0</span>,
+  <span class="key">"shippingCost"</span>: <span class="number">5.00</span>,
+  <span class="key">"discountAmount"</span>: <span class="number">0</span>,
+  <span class="key">"total"</span>: <span class="number">54.99</span>
+}
+
+<span class="comment">// Response (201)</span>
+{
+  <span class="key">"success"</span>: <span class="keyword">true</span>,
+  <span class="key">"orderId"</span>: <span class="string">"clxyz..."</span>,
+  <span class="key">"orderNumber"</span>: <span class="string">"LR-5678"</span>
+}</pre>
+  </div>
+
+  <div class="callout">
+    <p>Both endpoints require <code>Authorization: Bearer &lt;api-key&gt;</code> header.</p>
+  </div>
+
+  <!-- ── Variants ── -->
+  <h2>Variant Handling</h2>
+
+  <p>Lab Rats products have variants (Single, 3 Pack, 5 Pack, 10 Pack) with <code>unitsPerItem</code> set on each variant. When a master SKU is linked at the <strong>product level</strong>, the system automatically multiplies the quantity by the variant's <code>unitsPerItem</code>.</p>
+
+  <p><strong>Example:</strong></p>
+  <ul>
+    <li>Customer orders 1&times; "BPC-157 10mg &mdash; 3 Pack"</li>
+    <li>Variant has <code>unitsPerItem: 3</code></li>
+    <li>Master inventory deducts <strong>3 units</strong></li>
+  </ul>
+
+  <div class="callout">
+    <p>No need to create separate master SKU links per variant.</p>
+  </div>
+
+  <!-- ── Naming ── -->
+  <h2>SKU Naming Convention</h2>
+
+<pre>MSKU-{PRODUCT-NAME-UPPERCASE}</pre>
+
+  <p><strong>Examples:</strong></p>
+  <ul>
+    <li><code>MSKU-BPC-157-10MG</code></li>
+    <li><code>MSKU-GLP-T-40MG</code></li>
+    <li><code>MSKU-BACTERIOSTATIC-WATER</code></li>
+    <li><code>MSKU-TRIPLE-HELIX-MITOCHONDRIAL-POWERHOUSE-RESEARCH-BLEND</code></li>
+  </ul>
+
+  <!-- ── Quick ref ── -->
+  <h2>Quick Reference</h2>
+
+  <div class="quick-ref">
+    <dl>
+      <dt>Lab Rats Database</dt>
+      <dd><code>cms_labrats2026</code></dd>
+
+      <dt>Enoch Database</dt>
+      <dd><code>cms_enoch2026</code></dd>
+
+      <dt>Connected Site Name</dt>
+      <dd>Enoch</dd>
+
+      <dt>Total Products Linked</dt>
+      <dd><span class="badge">52</span></dd>
+
+      <dt>Master SKU Stock Field</dt>
+      <dd><code>MasterSku.stock</code> on Lab Rats &mdash; manage at <code>/admin/inventory</code></dd>
+    </dl>
+  </div>
+
+</div>
+
+</body>
+</html>

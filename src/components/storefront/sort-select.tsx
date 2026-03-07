@@ -13,16 +13,27 @@ export function SortSelect({ current }: { current: string }) {
   }
 
   return (
-    <select
-      value={current}
-      onChange={handleChange}
-      className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-    >
-      <option value="newest">Newest</option>
-      <option value="oldest">Oldest</option>
-      <option value="price-low">Price: Low to High</option>
-      <option value="price-high">Price: High to Low</option>
-      <option value="name">Name: A-Z</option>
-    </select>
+    <div className="relative inline-block">
+      <select
+        value={current}
+        onChange={handleChange}
+        className="appearance-none rounded-md border border-border bg-background py-2 pl-3 pr-10 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+      >
+        <option value="newest">Newest</option>
+        <option value="oldest">Oldest</option>
+        <option value="price-low">Price: Low to High</option>
+        <option value="price-high">Price: High to Low</option>
+        <option value="name">Name: A-Z</option>
+      </select>
+      <svg
+        className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2}
+        viewBox="0 0 24 24"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+      </svg>
+    </div>
   )
 }

@@ -1,11 +1,12 @@
 "use client"
 
-import { useState, useTransition, useRef } from "react"
+import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/toast"
 import { RichTextEditor } from "@/components/admin/rich-text-editor"
+import { ImageUploadField } from "@/components/admin/image-upload-field"
 import { createBlogPost, updateBlogPost } from "@/actions/blog"
 import { slugify } from "@/lib/utils"
 
@@ -35,32 +36,12 @@ export function PostForm({ post, categories, tags }: PostFormProps) {
   const [featuredImage, setFeaturedImage] = useState(post?.featuredImage || "")
   const [selectedCategories, setSelectedCategories] = useState<string[]>(post?.categoryIds || [])
   const [selectedTags, setSelectedTags] = useState<string[]>(post?.tagIds || [])
-  const [uploading, setUploading] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const { toast } = useToast()
   const router = useRouter()
 
   function handleTitleBlur(e: React.FocusEvent<HTMLInputElement>) {
     if (!slug && e.target.value) {
       setSlug(slugify(e.target.value))
-    }
-  }
-
-  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setUploading(true)
-    try {
-      const formData = new FormData()
-      formData.append("file", file)
-      const res = await fetch("/api/upload", { method: "POST", body: formData })
-      if (!res.ok) throw new Error("Upload failed")
-      const { url } = await res.json()
-      setFeaturedImage(url)
-    } catch {
-      toast("Failed to upload image", "error")
-    } finally {
-      setUploading(false)
     }
   }
 
@@ -191,44 +172,12 @@ export function PostForm({ post, categories, tags }: PostFormProps) {
 
           {/* Featured Image */}
           <div className="rounded-lg border border-border bg-background p-6">
-            <h2 className="mb-4 text-sm font-semibold uppercase text-secondary">Featured Image</h2>
-            {featuredImage ? (
-              <div className="space-y-3">
-                <img
-                  src={featuredImage}
-                  alt="Featured"
-                  className="w-full rounded-lg object-cover"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setFeaturedImage("")}
-                  className="w-full"
-                >
-                  Remove Image
-                </Button>
-              </div>
-            ) : (
-              <div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
-                  className="w-full"
-                >
-                  {uploading ? "Uploading..." : "Upload Image"}
-                </Button>
-              </div>
-            )}
+            <ImageUploadField
+              label="Featured Image"
+              value={featuredImage}
+              onChange={setFeaturedImage}
+              previewClass="w-full rounded-lg object-cover"
+            />
           </div>
 
           {/* Categories */}
