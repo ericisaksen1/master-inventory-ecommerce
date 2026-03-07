@@ -12,6 +12,7 @@ export default async function AdminProductsPage() {
         images: { where: { isPrimary: true }, take: 1 },
         categories: { include: { category: { select: { id: true, name: true } } } },
         variants: { select: { stock: true } },
+        masterSkuLinks: { where: { siteId: null }, take: 1, include: { masterSku: { select: { sku: true } } } },
       },
       orderBy: { createdAt: "desc" },
     }),
@@ -35,6 +36,7 @@ export default async function AdminProductsPage() {
     categoryName: p.categories[0]?.category.name || null,
     totalVariantStock: p.variants.reduce((sum, v) => sum + v.stock, 0),
     hasVariants: p.variants.length > 0,
+    masterSku: p.masterSkuLinks[0]?.masterSku.sku || null,
   }))
 
   return (

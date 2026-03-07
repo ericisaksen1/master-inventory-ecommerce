@@ -23,6 +23,7 @@ interface Product {
   categoryName: string | null
   totalVariantStock: number
   hasVariants: boolean
+  masterSku: string | null
 }
 
 interface Category {
@@ -51,6 +52,7 @@ export function ProductTable({ products, categories }: ProductTableProps) {
               <th className="px-4 py-3 text-left font-medium">Price</th>
               <th className="px-4 py-3 text-left font-medium">Stock</th>
               <th className="px-4 py-3 text-left font-medium">Category</th>
+              <th className="px-4 py-3 text-left font-medium">Master SKU</th>
               <th className="px-4 py-3 text-left font-medium">Status</th>
             </tr>
           </thead>
@@ -134,6 +136,9 @@ function ProductRow({
         </td>
         <td className="px-4 py-3">{stock}</td>
         <td className="px-4 py-3 text-secondary">{product.categoryName || "—"}</td>
+        <td className="px-4 py-3 font-mono text-xs text-secondary">
+          {product.masterSku || "—"}
+        </td>
         <td className="px-4 py-3">
           <div className="flex gap-1">
             <Badge color={product.isActive ? "green" : "red"}>
@@ -145,7 +150,7 @@ function ProductRow({
       </tr>
       {isEditing && (
         <tr>
-          <td colSpan={6} className="border-t border-border bg-muted/50 px-4 py-4">
+          <td colSpan={7} className="border-t border-border bg-muted/50 px-4 py-4">
             <QuickEditForm
               product={product}
               categories={categories}

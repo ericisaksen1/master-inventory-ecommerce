@@ -8,6 +8,7 @@ import type { OrderStatus } from "@prisma/client"
 import { notifyCustomerStatusChanged } from "@/lib/email/notify"
 import { getSetting } from "@/lib/settings"
 import { submitPrintfulItems } from "@/lib/printful-fulfillment"
+import { syncStatusToConnectedSite } from "@/lib/order-status-sync"
 
 async function requireAdmin() {
   const session = await auth()
@@ -116,7 +117,13 @@ export async function updateOrderStatus(
 
     const order = await prisma.order.findUnique({
       where: { id: orderId },
-      select: { orderNumber: true, guestEmail: true, user: { select: { email: true } } },
+      select: {
+        orderNumber: true,
+        guestEmail: true,
+        sourceSiteId: true,
+        sourceOrderNumber: true,
+        user: { select: { email: true } },
+      },
     })
 
     await prisma.order.update({
@@ -127,6 +134,11 @@ export async function updateOrderStatus(
     const statusEmail = order?.user?.email || order?.guestEmail
     if (statusEmail) {
       void notifyCustomerStatusChanged(statusEmail, order.orderNumber, status)
+    }
+
+    // Sync status to connected site if this is a drop-ship order
+    if (order?.sourceSiteId && order.sourceOrderNumber) {
+      void syncStatusToConnectedSite(order.sourceSiteId, order.sourceOrderNumber, status)
     }
 
     revalidatePath(`/admin/orders/${orderId}`)
