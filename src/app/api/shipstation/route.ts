@@ -17,7 +17,6 @@ async function verifyAuth(req: NextRequest): Promise<boolean> {
   if (!authKey) return false
 
   // ShipStation sends credentials via Basic Auth
-  // Accept auth key as either the username or password
   const authHeader = req.headers.get("authorization")
   if (authHeader?.startsWith("Basic ")) {
     const decoded = Buffer.from(authHeader.slice(6), "base64").toString()
@@ -25,8 +24,13 @@ async function verifyAuth(req: NextRequest): Promise<boolean> {
     if (username === authKey || password === authKey) return true
   }
 
-  // Also allow query param for flexibility
+  // ShipStation Custom Store also sends credentials as query params
   const url = new URL(req.url)
+  const ssUser = url.searchParams.get("SS-UserName")
+  const ssPass = url.searchParams.get("SS-Password")
+  if (ssUser === authKey || ssPass === authKey) return true
+
+  // Fallback query param
   if (url.searchParams.get("auth_key") === authKey) return true
 
   return false
