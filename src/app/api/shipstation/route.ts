@@ -66,14 +66,24 @@ export async function GET(req: NextRequest) {
   const page = parseInt(url.searchParams.get("page") || "1")
   const pageSize = 100
 
+  console.log(`[shipstation] Export request: start_date=${startDate}, end_date=${endDate}, page=${page}`)
+
   const where: Record<string, unknown> = {
     status: { in: ["AWAITING_PAYMENT", "PAYMENT_COMPLETE", "ORDER_COMPLETE", "CANCELLED"] },
   }
 
   if (startDate || endDate) {
     where.updatedAt = {}
-    if (startDate) (where.updatedAt as Record<string, Date>).gte = new Date(startDate)
-    if (endDate) (where.updatedAt as Record<string, Date>).lte = new Date(endDate)
+    if (startDate) {
+      const parsed = new Date(startDate)
+      console.log(`[shipstation] Parsed start_date: ${parsed.toISOString()}`)
+      ;(where.updatedAt as Record<string, Date>).gte = parsed
+    }
+    if (endDate) {
+      const parsed = new Date(endDate)
+      console.log(`[shipstation] Parsed end_date: ${parsed.toISOString()}`)
+      ;(where.updatedAt as Record<string, Date>).lte = parsed
+    }
   }
 
   const [orders, total] = await Promise.all([
@@ -89,6 +99,8 @@ export async function GET(req: NextRequest) {
     }),
     prisma.order.count({ where }),
   ])
+
+  console.log(`[shipstation] Returning ${orders.length} orders (total: ${total}, page: ${page})`)
 
   const totalPages = Math.ceil(total / pageSize) || 1
 
