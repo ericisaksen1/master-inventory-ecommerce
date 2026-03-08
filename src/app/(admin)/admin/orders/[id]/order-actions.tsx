@@ -105,61 +105,65 @@ export function AdminOrderActions({
           )}
         </div>
 
-        {/* Resend status email */}
-        <div className="mt-4 border-t border-gray-200 pt-4">
-          <Button
-            variant="outline"
-            className="w-full"
-            disabled={isPending}
-            onClick={() => {
-              startTransition(async () => {
-                const result = await resendStatusEmail(orderId)
-                if (result.error) {
-                  toast(result.error, "error")
-                } else {
-                  toast("Status email sent")
-                }
-              })
-            }}
-          >
-            {isPending ? "Sending..." : "Resend Status Email"}
-          </Button>
-        </div>
+        {currentStatus !== "CANCELLED" && (
+          <>
+            {/* Resend status email */}
+            <div className="mt-4 border-t border-gray-200 pt-4">
+              <Button
+                variant="outline"
+                className="w-full"
+                disabled={isPending}
+                onClick={() => {
+                  startTransition(async () => {
+                    const result = await resendStatusEmail(orderId)
+                    if (result.error) {
+                      toast(result.error, "error")
+                    } else {
+                      toast("Status email sent")
+                    }
+                  })
+                }}
+              >
+                {isPending ? "Sending..." : "Resend Status Email"}
+              </Button>
+            </div>
 
-        {/* Manual status override */}
-        <div className="mt-4 border-t border-gray-200 pt-4">
-          <p className="text-xs font-medium text-gray-500">Change Status</p>
-          <div className="mt-2 flex gap-2">
-            <select
-              value={manualStatus}
-              onChange={(e) => setManualStatus(e.target.value as OrderStatus)}
-              disabled={isPending}
-              className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm"
-            >
-              <option value="AWAITING_PAYMENT">Awaiting Payment</option>
-              <option value="PAYMENT_COMPLETE">Payment Complete</option>
-              <option value="ORDER_COMPLETE">Order Complete</option>
-              <option value="CANCELLED">Cancelled</option>
-            </select>
-            <Button
-              variant="secondary"
-              disabled={isPending || manualStatus === currentStatus}
-              onClick={() => {
-                startTransition(async () => {
-                  const result = await updateOrderStatus(orderId, manualStatus)
-                  if (result.error) {
-                    toast(result.error, "error")
-                  } else {
-                    toast("Status updated")
-                    router.refresh()
-                  }
-                })
-              }}
-            >
-              {isPending ? "..." : "Update"}
-            </Button>
-          </div>
-        </div>
+            {/* Manual status override */}
+            <div className="mt-4 border-t border-gray-200 pt-4">
+              <p className="text-xs font-medium text-gray-500">Change Status</p>
+              <div className="mt-2 flex gap-2">
+                <select
+                  value={manualStatus}
+                  onChange={(e) => setManualStatus(e.target.value as OrderStatus)}
+                  disabled={isPending}
+                  className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm"
+                >
+                  <option value="AWAITING_PAYMENT">Awaiting Payment</option>
+                  <option value="PAYMENT_COMPLETE">Payment Complete</option>
+                  <option value="ORDER_COMPLETE">Order Complete</option>
+                  <option value="CANCELLED">Cancelled</option>
+                </select>
+                <Button
+                  variant="secondary"
+                  disabled={isPending || manualStatus === currentStatus}
+                  onClick={() => {
+                    startTransition(async () => {
+                      const result = await updateOrderStatus(orderId, manualStatus)
+                      if (result.error) {
+                        toast(result.error, "error")
+                      } else {
+                        toast("Status updated")
+                        router.refresh()
+                      }
+                    })
+                  }}
+                >
+                  {isPending ? "..." : "Update"}
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Shipping / Tracking Info */}

@@ -43,6 +43,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Order not found" }, { status: 404 })
   }
 
+  if (order.status === "CANCELLED") {
+    return NextResponse.json({ error: "Cancelled orders cannot be modified" }, { status: 400 })
+  }
+
   // Only sync certain statuses from the connected site
   const allowedStatuses = ["AWAITING_PAYMENT", "PAYMENT_COMPLETE", "ORDER_COMPLETE", "CANCELLED"] as const
   if (!allowedStatuses.includes(body.status as any)) {

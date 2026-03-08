@@ -137,6 +137,7 @@ export async function updateOrderStatus(
     })
 
     if (!order) return { success: false, error: "Order not found" }
+    if (order.status === "CANCELLED") return { success: false, error: "Cancelled orders cannot be modified" }
 
     await prisma.order.update({
       where: { id: orderId },
