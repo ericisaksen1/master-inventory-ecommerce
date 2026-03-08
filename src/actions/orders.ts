@@ -119,17 +119,38 @@ export async function updateOrderStatus(
       where: { id: orderId },
       select: {
         orderNumber: true,
+        status: true,
         guestEmail: true,
         sourceSiteId: true,
         sourceOrderNumber: true,
         user: { select: { email: true } },
+        items: { select: { productId: true, variantId: true, quantity: true } },
       },
     })
+
+    if (!order) return { success: false, error: "Order not found" }
 
     await prisma.order.update({
       where: { id: orderId },
       data: { status },
     })
+
+    // Restock items when cancelling (only if not already cancelled)
+    if (status === "CANCELLED" && order.status !== "CANCELLED") {
+      for (const item of order.items) {
+        if (item.variantId) {
+          await prisma.productVariant.update({
+            where: { id: item.variantId },
+            data: { stock: { increment: item.quantity } },
+          })
+        } else {
+          await prisma.product.update({
+            where: { id: item.productId },
+            data: { stock: { increment: item.quantity } },
+          })
+        }
+      }
+    }
 
     const statusEmail = order?.user?.email || order?.guestEmail
     if (statusEmail) {

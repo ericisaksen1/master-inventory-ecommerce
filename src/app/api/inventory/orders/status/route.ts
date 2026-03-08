@@ -48,6 +48,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, message: "Status noted but not synced" })
   }
 
+  const previousStatus = order.status
+
   await prisma.order.update({
     where: { id: order.id },
     data: { status: body.status as any },
@@ -59,6 +61,28 @@ export async function POST(request: NextRequest) {
       where: { orderId: order.id, status: "PENDING" },
       data: { status: "CONFIRMED", confirmedAt: new Date() },
     })
+  }
+
+  // Restock items when cancelling (only if not already cancelled)
+  if (body.status === "CANCELLED" && previousStatus !== "CANCELLED") {
+    const items = await prisma.orderItem.findMany({
+      where: { orderId: order.id },
+      select: { productId: true, variantId: true, quantity: true },
+    })
+
+    for (const item of items) {
+      if (item.variantId) {
+        await prisma.productVariant.update({
+          where: { id: item.variantId },
+          data: { stock: { increment: item.quantity } },
+        })
+      } else {
+        await prisma.product.update({
+          where: { id: item.productId },
+          data: { stock: { increment: item.quantity } },
+        })
+      }
+    }
   }
 
   return NextResponse.json({ success: true })
