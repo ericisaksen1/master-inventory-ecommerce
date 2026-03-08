@@ -335,7 +335,7 @@ export async function createOrder(formData: FormData) {
   }
 
   // Determine customer info for notifications
-  const customerName = isGuest ? (accountName || "Guest") : (session.user!.name || "Customer")
+  const customerName = isGuest ? `${addressData.firstName} ${addressData.lastName}`.trim() || "Guest" : (session.user!.name || "Customer")
   const customerEmail = isGuest ? guestEmail! : session.user!.email!
 
   // Add to subscriber list
