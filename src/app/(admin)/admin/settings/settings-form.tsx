@@ -200,6 +200,7 @@ export function SettingsForm({ settings, isSuperAdmin }: SettingsFormProps) {
   const [bulkOrderEnabled, setBulkOrderEnabled] = useState(settings.bulk_order_popup_enabled === "true")
   const [bulkOrderAfterEntry, setBulkOrderAfterEntry] = useState(settings.bulk_order_show_after_entry === "true")
   const [bulkOrderPdfUrl, setBulkOrderPdfUrl] = useState(settings.bulk_order_pdf_url || "")
+  const [bulkOrderContent, setBulkOrderContent] = useState(settings.email_tpl_bulk_order_content || "")
   const [pdfUploading, setPdfUploading] = useState(false)
 
   // Entry popup state
@@ -1017,24 +1018,9 @@ export function SettingsForm({ settings, isSuperAdmin }: SettingsFormProps) {
                 <div className="space-y-3">
                   <Input label="Subject Line" name="setting_email_tpl_bulk_order_subject" defaultValue={settings.email_tpl_bulk_order_subject || ""} placeholder="Your Bulk Order Price List" />
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-gray-700">Intro Text</label>
-                    <textarea
-                      name="setting_email_tpl_bulk_order_intro"
-                      defaultValue={settings.email_tpl_bulk_order_intro || ""}
-                      placeholder="Optional intro paragraph above the main content"
-                      rows={2}
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-sm font-medium text-gray-700">Outro Text</label>
-                    <textarea
-                      name="setting_email_tpl_bulk_order_outro"
-                      defaultValue={settings.email_tpl_bulk_order_outro || ""}
-                      placeholder="Optional closing paragraph below the main content"
-                      rows={2}
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
-                    />
+                    <label className="mb-1 block text-sm font-medium text-gray-700">Email Content</label>
+                    <input type="hidden" name="setting_email_tpl_bulk_order_content" value={bulkOrderContent} />
+                    <RichTextEditor content={bulkOrderContent} onChange={setBulkOrderContent} />
                   </div>
                 </div>
               </div>

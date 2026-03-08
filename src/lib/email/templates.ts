@@ -309,17 +309,16 @@ export function bulkOrderAdminTemplate(email: string, branding: EmailBranding = 
   }
 }
 
-export function bulkOrderCustomerTemplate(customization: TemplateCustomization = {}) {
-  const { branding, subject, introText, outroText } = customization
+export function bulkOrderCustomerTemplate(customization: TemplateCustomization & { contentHtml?: string } = {}) {
+  const { branding, subject, contentHtml } = customization
   const defaultSubject = "Your Bulk Order Price List"
+
+  const body = contentHtml
+    || `<p>Thank you for your interest in bulk ordering! Please find our price list attached to this email.</p>
+        <p>If you have any questions or would like to place a bulk order, simply reply to this email.</p>`
 
   return {
     subject: subject || defaultSubject,
-    html: layout("Bulk Order Price List", `
-      ${wrapIntro(introText)}
-      <p>Thank you for your interest in bulk ordering! Please find our price list attached to this email.</p>
-      <p>If you have any questions or would like to place a bulk order, simply reply to this email.</p>
-      ${wrapOutro(outroText)}
-    `, branding),
+    html: layout("Bulk Order Price List", body, branding),
   }
 }

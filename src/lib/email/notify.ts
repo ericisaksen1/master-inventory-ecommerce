@@ -200,7 +200,8 @@ export async function notifyCustomerBulkOrder(customerEmail: string) {
   const { branding, settings } = await getEmailPersonalization()
   const mergeVars = { storeName: branding.storeName || "" }
   const customization = getTemplateCustomization(settings, "bulk_order", branding, mergeVars)
-  const { subject, html } = bulkOrderCustomerTemplate(customization)
+  const contentHtml = settings.email_tpl_bulk_order_content || undefined
+  const { subject, html } = bulkOrderCustomerTemplate({ ...customization, contentHtml })
 
   const pdfUrl = settings.bulk_order_pdf_url
   let attachments: { filename: string; content: Buffer }[] | undefined

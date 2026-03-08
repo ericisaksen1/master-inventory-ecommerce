@@ -107,8 +107,7 @@ const SUPER_ADMIN_ONLY_KEYS = new Set([
   "bulk_order_show_after_entry",
   "bulk_order_pdf_url",
   "email_tpl_bulk_order_subject",
-  "email_tpl_bulk_order_intro",
-  "email_tpl_bulk_order_outro",
+  "email_tpl_bulk_order_content",
 ])
 
 export async function updateSettings(formData: FormData) {

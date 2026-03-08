@@ -5,7 +5,7 @@ import StarterKit from "@tiptap/starter-kit"
 import Link from "@tiptap/extension-link"
 import Underline from "@tiptap/extension-underline"
 import Image from "@tiptap/extension-image"
-import { useCallback } from "react"
+import { useCallback, useState } from "react"
 
 interface RichTextEditorProps {
   content: string
@@ -13,6 +13,9 @@ interface RichTextEditorProps {
 }
 
 export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
+  const [showSource, setShowSource] = useState(false)
+  const [sourceCode, setSourceCode] = useState(content)
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -124,9 +127,34 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
           isActive={editor.isActive("codeBlock")}
           label="Code"
         />
+        <div className="mx-1 w-px bg-border" />
+        <ToolbarButton
+          onClick={() => {
+            if (showSource) {
+              editor.commands.setContent(sourceCode, true)
+              onChange(sourceCode)
+            } else {
+              setSourceCode(editor.getHTML())
+            }
+            setShowSource(!showSource)
+          }}
+          isActive={showSource}
+          label="<HTML>"
+        />
       </div>
 
-      <EditorContent editor={editor} />
+      {showSource ? (
+        <textarea
+          value={sourceCode}
+          onChange={(e) => {
+            setSourceCode(e.target.value)
+            onChange(e.target.value)
+          }}
+          className="w-full min-h-[300px] px-4 py-3 font-mono text-sm focus:outline-none"
+        />
+      ) : (
+        <EditorContent editor={editor} />
+      )}
     </div>
   )
 }
