@@ -7,7 +7,7 @@ export const metadata = { title: "Settings" }
 // Keys this form actually uses — only fetch these
 const SETTINGS_FORM_KEYS = [
   "store_name", "store_description",
-  "enable_paypal", "paypal_email", "paypal_qr_url",
+  "enable_paypal", "paypal_email", "paypal_qr_url", "paypal_pay_url",
   "enable_venmo", "venmo_username", "venmo_qr_url",
   "enable_cashapp", "cashapp_tag", "cashapp_qr_url",
   "enable_bitcoin", "bitcoin_address", "bitcoin_qr_url",

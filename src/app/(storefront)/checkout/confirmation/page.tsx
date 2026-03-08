@@ -97,6 +97,22 @@ export default async function ConfirmationPage({ searchParams }: Props) {
           </div>
         )}
 
+        {instructions.payUrl && (
+          <div className="mt-4">
+            <a
+              href={instructions.payUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
+            >
+              Pay on {instructions.displayName}
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+              </svg>
+            </a>
+          </div>
+        )}
+
         {instructions.qrCodeUrl && (
           <div className="mt-4 flex justify-center">
             <img src={instructions.qrCodeUrl} alt="Payment QR Code" className="h-48 w-48" />

@@ -7,6 +7,7 @@ export class PaypalPaymentProvider implements PaymentProvider {
   async getInstructions(orderNumber: string, amount: string): Promise<PaymentInstructions> {
     const email = await getSetting("paypal_email")
     const qrUrl = await getSetting("paypal_qr_url")
+    const payUrl = await getSetting("paypal_pay_url")
 
     return {
       method: this.method,
@@ -14,6 +15,7 @@ export class PaypalPaymentProvider implements PaymentProvider {
       instructions: `Send $${amount} to ${email || "[not configured]"} on PayPal. Include your order number in the note.`,
       address: email || "Not configured",
       qrCodeUrl: qrUrl || undefined,
+      payUrl: payUrl || undefined,
       additionalFields: [
         { label: "Amount", value: `$${amount}` },
         { label: "Note / Memo", value: orderNumber },

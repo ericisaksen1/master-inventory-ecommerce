@@ -6,6 +6,7 @@ export interface PaymentInstructions {
   instructions: string
   address: string
   qrCodeUrl?: string
+  payUrl?: string
   additionalFields?: { label: string; value: string }[]
 }
 

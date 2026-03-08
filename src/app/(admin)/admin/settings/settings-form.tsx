@@ -51,6 +51,7 @@ const settingGroups: {
     enableKey: "enable_paypal",
     fields: [
       { key: "paypal_email", label: "PayPal Email", type: "text", placeholder: "you@example.com" },
+      { key: "paypal_pay_url", label: "PayPal Pay Link (optional)", type: "text", placeholder: "https://www.paypal.com/biz/profile/yourname" },
       { key: "paypal_qr_url", label: "PayPal QR Code URL (optional)", type: "text", placeholder: "https://..." },
     ],
   },
