@@ -144,8 +144,8 @@ export async function updateOrderStatus(
       data: { status },
     })
 
-    // Restock items when cancelling (only if not already cancelled)
-    if (status === "CANCELLED" && order.status !== "CANCELLED") {
+    // Restock items when cancelling
+    if (status === "CANCELLED") {
       for (const item of order.items) {
         // Use the same lookup as checkout to find master SKU links
         const masterLink = await getMasterSkuForProduct(item.productId, item.variantId ?? undefined)
