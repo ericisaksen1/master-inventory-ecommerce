@@ -9,6 +9,7 @@ import { notifyCustomerStatusChanged } from "@/lib/email/notify"
 import { getSetting } from "@/lib/settings"
 import { submitPrintfulItems } from "@/lib/printful-fulfillment"
 import { syncStatusToConnectedSite } from "@/lib/order-status-sync"
+import { getMasterSkuForProduct } from "@/lib/master-inventory"
 
 async function requireAdmin() {
   const session = await auth()
@@ -124,7 +125,14 @@ export async function updateOrderStatus(
         sourceSiteId: true,
         sourceOrderNumber: true,
         user: { select: { email: true } },
-        items: { select: { productId: true, variantId: true, quantity: true } },
+        items: {
+          select: {
+            productId: true,
+            variantId: true,
+            quantity: true,
+            variant: { select: { options: true } },
+          },
+        },
       },
     })
 
@@ -138,11 +146,33 @@ export async function updateOrderStatus(
     // Restock items when cancelling (only if not already cancelled)
     if (status === "CANCELLED" && order.status !== "CANCELLED") {
       for (const item of order.items) {
-        if (item.variantId) {
-          await prisma.productVariant.update({
-            where: { id: item.variantId },
-            data: { stock: { increment: item.quantity } },
+        // Use the same lookup as checkout to find master SKU links
+        const masterLink = await getMasterSkuForProduct(item.productId, item.variantId ?? undefined)
+
+        if (masterLink) {
+          // Master-linked: restock the master SKU (includes unitsPerItem scaling)
+          await prisma.masterSku.update({
+            where: { id: masterLink.masterSkuId },
+            data: { stock: { increment: item.quantity * masterLink.quantityMultiplier } },
           })
+        } else if (item.variantId) {
+          // Check for pack variant
+          const variantOptions = (item.variant?.options ?? []) as { name: string; value: string }[]
+          const packOption = variantOptions.find((o) => o.name === "Pack")
+          const packSize = packOption ? (parseInt(packOption.value) || 1) : 0
+
+          if (packSize > 0) {
+            // Pack variant: restock product stock by packSize * quantity
+            await prisma.product.update({
+              where: { id: item.productId },
+              data: { stock: { increment: packSize * item.quantity } },
+            })
+          } else {
+            await prisma.productVariant.update({
+              where: { id: item.variantId },
+              data: { stock: { increment: item.quantity } },
+            })
+          }
         } else {
           await prisma.product.update({
             where: { id: item.productId },

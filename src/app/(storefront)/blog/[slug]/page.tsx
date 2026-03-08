@@ -5,7 +5,6 @@ import { getSettings } from "@/lib/settings"
 import { SetAdminEdit } from "@/components/storefront/admin-toolbar"
 import { BlogPostCard } from "@/components/storefront/blog-post-card"
 import type { BlogCardStyle } from "@/components/storefront/blog-post-card"
-import { SocialShare } from "@/components/storefront/social-share"
 import { JsonLd } from "@/components/storefront/json-ld"
 import Link from "next/link"
 import type { Metadata } from "next"
@@ -192,10 +191,6 @@ export default async function BlogPostPage({ params }: Props) {
           </div>
         </div>
       )}
-
-      <div className="mt-8 border-t border-border pt-6">
-        <SocialShare url={`/blog/${slug}`} title={post.title} />
-      </div>
 
       {relatedPosts.length > 0 && (
         <div className="mt-12 border-t border-border pt-8">
