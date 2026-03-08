@@ -20,7 +20,6 @@ interface SiteData {
   apiKey: string
   apiUrl: string
   isActive: boolean
-  linkedProducts: number
   createdAt: string
 }
 
