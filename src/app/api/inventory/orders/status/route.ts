@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Only sync certain statuses from the connected site
-  const allowedStatuses = ["PAYMENT_COMPLETE", "CANCELLED"] as const
+  const allowedStatuses = ["AWAITING_PAYMENT", "PAYMENT_COMPLETE", "ORDER_COMPLETE", "CANCELLED"] as const
   if (!allowedStatuses.includes(body.status as any)) {
     return NextResponse.json({ success: true, message: "Status noted but not synced" })
   }
