@@ -68,8 +68,8 @@ export async function POST(request: NextRequest) {
     })
   }
 
-  // Restock items when cancelling (only if not already cancelled)
-  if (body.status === "CANCELLED" && previousStatus !== "CANCELLED") {
+  // Restock items when cancelling
+  if (body.status === "CANCELLED") {
     const items = await prisma.orderItem.findMany({
       where: { orderId: order.id },
       select: {
