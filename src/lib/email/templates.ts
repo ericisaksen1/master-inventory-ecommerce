@@ -170,7 +170,8 @@ export function newOrderAdminTemplate(
       <p>A new order has been placed:</p>
       <table style="width:100%;border-collapse:collapse;margin:16px 0">
         <tr><td style="padding:8px 12px;background:#f9f9f9;font-weight:600;width:100px">Order</td><td style="padding:8px 12px">#${esc(orderNumber)}</td></tr>
-        <tr><td style="padding:8px 12px;background:#f9f9f9;font-weight:600">Customer</td><td style="padding:8px 12px">${esc(customerName)}${customerEmail ? ` (${esc(customerEmail)})` : ""}</td></tr>
+        <tr><td style="padding:8px 12px;background:#f9f9f9;font-weight:600">Name</td><td style="padding:8px 12px">${esc(customerName)}</td></tr>
+        ${customerEmail ? `<tr><td style="padding:8px 12px;background:#f9f9f9;font-weight:600">Email</td><td style="padding:8px 12px">${esc(customerEmail)}</td></tr>` : ""}
         <tr><td style="padding:8px 12px;background:#f9f9f9;font-weight:600">Total</td><td style="padding:8px 12px;font-weight:600">${total}</td></tr>
       </table>
       ${itemRows}
