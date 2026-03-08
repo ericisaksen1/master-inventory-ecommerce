@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Only sync certain statuses from the connected site
-  const allowedStatuses = ["CANCELLED"] as const
+  const allowedStatuses = ["PAYMENT_COMPLETE", "CANCELLED"] as const
   if (!allowedStatuses.includes(body.status as any)) {
     return NextResponse.json({ success: true, message: "Status noted but not synced" })
   }
@@ -52,6 +52,14 @@ export async function POST(request: NextRequest) {
     where: { id: order.id },
     data: { status: body.status as any },
   })
+
+  // Also confirm the payment record when payment is confirmed on the source site
+  if (body.status === "PAYMENT_COMPLETE") {
+    await prisma.payment.updateMany({
+      where: { orderId: order.id, status: "PENDING" },
+      data: { status: "CONFIRMED", confirmedAt: new Date() },
+    })
+  }
 
   return NextResponse.json({ success: true })
 }

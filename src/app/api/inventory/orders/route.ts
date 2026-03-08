@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
       data: {
         orderNumber: labRatsOrderNumber,
         guestEmail: body.customer.email,
-        status: "PAYMENT_COMPLETE",
+        status: "AWAITING_PAYMENT",
         subtotal: body.subtotal,
         tax: body.tax,
         shippingCost: body.shippingCost,
@@ -185,9 +185,8 @@ export async function POST(request: NextRequest) {
       data: {
         orderId: order.id,
         method: "EXTERNAL",
-        status: "CONFIRMED",
+        status: "PENDING",
         amount: body.total,
-        confirmedAt: new Date(),
         transactionRef: `${auth.site.name}: ${body.orderNumber}`,
       },
     })
