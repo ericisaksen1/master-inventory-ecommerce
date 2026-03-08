@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
 import { getSettings } from "@/lib/settings"
+import { getAvailableStockBulk } from "@/lib/master-inventory"
 import { ProductSearch } from "@/components/storefront/product-search"
 import { ProductFilters } from "@/components/storefront/product-filters"
 import { CategoryNav } from "@/components/storefront/category-nav"
@@ -84,17 +85,35 @@ export async function ProductListing({
     },
   })
 
-  const products = rawProducts.map((p) => ({
-    ...p,
-    basePrice: Number(p.basePrice),
-    compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : null,
-    costPrice: p.costPrice ? Number(p.costPrice) : null,
-    variants: p.variants.map((v) => ({ ...v, price: Number(v.price) })),
-    stock: p.variants.length === 1 ? p.variants[0].stock : p.stock,
-    defaultVariantId: p.variants.length === 1 ? p.variants[0].id : null,
-    hasMultipleVariants: p.variants.length > 1,
-    hasVariantPricing: p.variants.length > 1 && new Set(p.variants.map((v) => v.price.toString())).size > 1,
-  }))
+  // Master stock overrides
+  const productIds = rawProducts.map((p) => p.id)
+  const masterLinks = await prisma.masterSkuLink.findMany({
+    where: { productId: { in: productIds }, variantId: null, siteId: null },
+    select: { productId: true, masterSkuId: true },
+  })
+  const masterSkuIds = [...new Set(masterLinks.map((l) => l.masterSkuId))]
+  const masterStockMap = masterSkuIds.length > 0 ? await getAvailableStockBulk(masterSkuIds) : new Map()
+  const productMasterStock = new Map<string, number>()
+  for (const link of masterLinks) {
+    if (link.productId) {
+      productMasterStock.set(link.productId, masterStockMap.get(link.masterSkuId) ?? 0)
+    }
+  }
+
+  const products = rawProducts.map((p) => {
+    const localStock = p.variants.length === 1 ? p.variants[0].stock : p.stock
+    return {
+      ...p,
+      basePrice: Number(p.basePrice),
+      compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : null,
+      costPrice: p.costPrice ? Number(p.costPrice) : null,
+      variants: p.variants.map((v) => ({ ...v, price: Number(v.price) })),
+      stock: productMasterStock.has(p.id) ? productMasterStock.get(p.id)! : localStock,
+      defaultVariantId: p.variants.length === 1 ? p.variants[0].id : null,
+      hasMultipleVariants: p.variants.length > 1,
+      hasVariantPricing: p.variants.length > 1 && new Set(p.variants.map((v) => v.price.toString())).size > 1,
+    }
+  })
 
   // Wishlist IDs
   let wishlistIds: string[] = []
