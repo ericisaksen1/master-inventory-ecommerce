@@ -41,8 +41,7 @@ const EMAIL_PERSONALIZATION_KEYS = [
   "email_tpl_password_changed_intro",
   "email_tpl_password_changed_outro",
   "email_tpl_bulk_order_subject",
-  "email_tpl_bulk_order_intro",
-  "email_tpl_bulk_order_outro",
+  "email_tpl_bulk_order_content",
   "bulk_order_pdf_url",
 ]
 
