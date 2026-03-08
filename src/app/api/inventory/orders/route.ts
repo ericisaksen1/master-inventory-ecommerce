@@ -101,12 +101,31 @@ export async function POST(request: NextRequest) {
   })
   const stockMap = new Map(masterSkuRecords.map((m) => [m.id, m]))
 
-  // Aggregate quantities per master SKU
+  // Look up unitsPerItem for variants by matching variantName on the local product
+  // e.g. "3 Pack" variant has unitsPerItem=3, so ordering one "3 Pack" consumes 3 master SKU units
+  const variantUnitsCache = new Map<string, number>()
+  for (const item of body.items) {
+    if (!item.variantName) continue
+    const local = localMap.get(item.masterSku)!
+    const cacheKey = `${local.productId}:${item.variantName}`
+    if (!variantUnitsCache.has(cacheKey)) {
+      const variant = await prisma.productVariant.findFirst({
+        where: { productId: local.productId, name: item.variantName },
+        select: { unitsPerItem: true },
+      })
+      variantUnitsCache.set(cacheKey, variant?.unitsPerItem ?? 1)
+    }
+  }
+
+  // Aggregate quantities per master SKU, applying quantityMultiplier and unitsPerItem
   const qtyByMasterSku = new Map<string, number>()
   for (const item of body.items) {
     const local = localMap.get(item.masterSku)!
+    const cacheKey = `${local.productId}:${item.variantName}`
+    const variantUnits = item.variantName ? (variantUnitsCache.get(cacheKey) ?? 1) : 1
+    const units = item.quantity * local.quantityMultiplier * variantUnits
     const current = qtyByMasterSku.get(local.masterSkuId) ?? 0
-    qtyByMasterSku.set(local.masterSkuId, current + item.quantity)
+    qtyByMasterSku.set(local.masterSkuId, current + units)
   }
 
   for (const [msId, qty] of qtyByMasterSku) {

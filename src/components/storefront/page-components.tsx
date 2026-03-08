@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { getSettings } from "@/lib/settings"
+import { getAvailableStockBulk } from "@/lib/master-inventory"
 import type { ProductCardStyle } from "./product-card"
 import type { BlogCardStyle } from "./blog-post-card"
 import { FeaturedProductsCarousel } from "./featured-products-carousel"
@@ -142,23 +143,38 @@ export async function PageComponents({ pageId, searchParams }: PageComponentsPro
             },
           })
 
-          const serializedProducts = products.map((p) => ({
-            slug: p.slug,
-            name: p.name,
-            basePrice: Number(p.basePrice),
-            compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : null,
-            shortDescription: p.shortDescription,
-            images: p.images.map((img) => ({
-              url: img.url,
-              alt: img.alt,
-              isPrimary: img.isPrimary,
-            })),
-            id: p.id,
-            stock: p.variants.length === 1 ? p.variants[0].stock : p.stock,
-            defaultVariantId: p.variants.length === 1 ? p.variants[0].id : null,
-            hasMultipleVariants: p.variants.length > 1,
-            hasVariantPricing: p.variants.length > 1 && new Set(p.variants.map((v) => v.price.toString())).size > 1,
-          }))
+          // Master stock overrides
+          const gridMasterLinks = await prisma.masterSkuLink.findMany({
+            where: { productId: { in: products.map((p) => p.id) }, variantId: null, siteId: null },
+            select: { productId: true, masterSkuId: true },
+          })
+          const gridMasterIds = [...new Set(gridMasterLinks.map((l) => l.masterSkuId))]
+          const gridMasterStock = await getAvailableStockBulk(gridMasterIds)
+          const gridProductMaster = new Map<string, number>()
+          for (const link of gridMasterLinks) {
+            if (link.productId) gridProductMaster.set(link.productId, gridMasterStock.get(link.masterSkuId) ?? 0)
+          }
+
+          const serializedProducts = products.map((p) => {
+            const localStock = p.variants.length === 1 ? p.variants[0].stock : p.stock
+            return {
+              slug: p.slug,
+              name: p.name,
+              basePrice: Number(p.basePrice),
+              compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : null,
+              shortDescription: p.shortDescription,
+              images: p.images.map((img) => ({
+                url: img.url,
+                alt: img.alt,
+                isPrimary: img.isPrimary,
+              })),
+              id: p.id,
+              stock: gridProductMaster.has(p.id) ? gridProductMaster.get(p.id)! : localStock,
+              defaultVariantId: p.variants.length === 1 ? p.variants[0].id : null,
+              hasMultipleVariants: p.variants.length > 1,
+              hasVariantPricing: p.variants.length > 1 && new Set(p.variants.map((v) => v.price.toString())).size > 1,
+            }
+          })
 
           return (
             <FeaturedProductsGrid
@@ -196,23 +212,38 @@ export async function PageComponents({ pageId, searchParams }: PageComponentsPro
             },
           })
 
-          const serializedProducts = products.map((p) => ({
-            slug: p.slug,
-            name: p.name,
-            basePrice: Number(p.basePrice),
-            compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : null,
-            shortDescription: p.shortDescription,
-            images: p.images.map((img) => ({
-              url: img.url,
-              alt: img.alt,
-              isPrimary: img.isPrimary,
-            })),
-            id: p.id,
-            stock: p.variants.length === 1 ? p.variants[0].stock : p.stock,
-            defaultVariantId: p.variants.length === 1 ? p.variants[0].id : null,
-            hasMultipleVariants: p.variants.length > 1,
-            hasVariantPricing: p.variants.length > 1 && new Set(p.variants.map((v) => v.price.toString())).size > 1,
-          }))
+          // Master stock overrides
+          const carouselMasterLinks = await prisma.masterSkuLink.findMany({
+            where: { productId: { in: products.map((p) => p.id) }, variantId: null, siteId: null },
+            select: { productId: true, masterSkuId: true },
+          })
+          const carouselMasterIds = [...new Set(carouselMasterLinks.map((l) => l.masterSkuId))]
+          const carouselMasterStock = await getAvailableStockBulk(carouselMasterIds)
+          const carouselProductMaster = new Map<string, number>()
+          for (const link of carouselMasterLinks) {
+            if (link.productId) carouselProductMaster.set(link.productId, carouselMasterStock.get(link.masterSkuId) ?? 0)
+          }
+
+          const serializedProducts = products.map((p) => {
+            const localStock = p.variants.length === 1 ? p.variants[0].stock : p.stock
+            return {
+              slug: p.slug,
+              name: p.name,
+              basePrice: Number(p.basePrice),
+              compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : null,
+              shortDescription: p.shortDescription,
+              images: p.images.map((img) => ({
+                url: img.url,
+                alt: img.alt,
+                isPrimary: img.isPrimary,
+              })),
+              id: p.id,
+              stock: carouselProductMaster.has(p.id) ? carouselProductMaster.get(p.id)! : localStock,
+              defaultVariantId: p.variants.length === 1 ? p.variants[0].id : null,
+              hasMultipleVariants: p.variants.length > 1,
+              hasVariantPricing: p.variants.length > 1 && new Set(p.variants.map((v) => v.price.toString())).size > 1,
+            }
+          })
 
           return (
             <FeaturedProductsCarousel

@@ -51,6 +51,17 @@ export function ProductCard({
     </span>
   )
 
+  const stock = product.stock ?? 0
+  const stockBadge = stock <= 0 ? (
+    <span className="absolute left-2 bottom-2 rounded-full bg-gray-800 px-2.5 py-1 text-[11px] font-medium text-white">
+      Out of Stock
+    </span>
+  ) : stock < 10 ? (
+    <span className="absolute left-2 bottom-2 rounded-full bg-red-600 px-2.5 py-1 text-[11px] font-medium text-white">
+      Almost gone!
+    </span>
+  ) : null
+
   const reviewBlock = reviewData && reviewData.count > 0 && (
     <div className="mt-1">
       <StarRating rating={Math.round(reviewData.avgRating)} count={reviewData.count} size="sm" />
@@ -78,6 +89,7 @@ export function ProductCard({
                 </div>
               )}
               {saleBadge}
+              {stockBadge}
               {wishlistBtn && (
                 <div className="absolute right-2 top-2">{wishlistBtn}</div>
               )}
@@ -149,6 +161,7 @@ export function ProductCard({
               </div>
             </div>
             {saleBadge}
+            {stockBadge}
           </div>
         </Link>
         {wishlistBtn && (
@@ -173,6 +186,7 @@ export function ProductCard({
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
               />
               {saleBadge}
+              {stockBadge}
             </div>
           ) : null}
           <div className="mt-4">
@@ -219,6 +233,7 @@ export function ProductCard({
               </div>
             )}
             {saleBadge}
+            {stockBadge}
             {wishlistBtn && (
               <div className="absolute right-2 top-2">{wishlistBtn}</div>
             )}
@@ -280,6 +295,7 @@ export function ProductCard({
             </div>
           )}
           {saleBadge}
+          {stockBadge}
           {wishlistBtn && (
             <div className="absolute right-2 top-2">{wishlistBtn}</div>
           )}

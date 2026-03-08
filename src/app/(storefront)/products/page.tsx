@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
 import { getSettings } from "@/lib/settings"
+import { getAvailableStockBulk } from "@/lib/master-inventory"
 import { ProductSearch } from "@/components/storefront/product-search"
 import { ProductFilters } from "@/components/storefront/product-filters"
 import { CategoryNav } from "@/components/storefront/category-nav"
@@ -11,7 +12,7 @@ import type { ProductCardStyle } from "@/components/storefront/product-card"
 export const metadata = { title: "All Products" }
 
 interface Props {
-  searchParams: Promise<{ sort?: string; minPrice?: string; maxPrice?: string; category?: string }>
+  searchParams: Promise<{ sort?: string; minPrice?: string; maxPrice?: string; category?: string; inStock?: string; onSale?: string }>
 }
 
 export default async function ProductsPage({ searchParams }: Props) {
@@ -47,6 +48,9 @@ export default async function ProductsPage({ searchParams }: Props) {
   if (params.category) {
     where.categories = { some: { category: { slug: params.category } } }
   }
+  if (params.onSale === "true") {
+    where.compareAtPrice = { not: null }
+  }
 
   // Fetch categories for filter UI
   const categories = await prisma.category.findMany({
@@ -64,17 +68,40 @@ export default async function ProductsPage({ searchParams }: Props) {
     },
   })
 
-  const products = rawProducts.map((p) => ({
-    ...p,
-    basePrice: Number(p.basePrice),
-    compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : null,
-    costPrice: p.costPrice ? Number(p.costPrice) : null,
-    variants: p.variants.map((v) => ({ ...v, price: Number(v.price) })),
-    stock: p.variants.length === 1 ? p.variants[0].stock : p.stock,
-    defaultVariantId: p.variants.length === 1 ? p.variants[0].id : null,
-    hasMultipleVariants: p.variants.length > 1,
-    hasVariantPricing: p.variants.length > 1 && new Set(p.variants.map((v) => v.price.toString())).size > 1,
-  }))
+  // Look up master SKU links for all products to override stock
+  const productIds = rawProducts.map((p) => p.id)
+  const masterLinks = await prisma.masterSkuLink.findMany({
+    where: { productId: { in: productIds }, variantId: null, siteId: null },
+    select: { productId: true, masterSkuId: true },
+  })
+  const masterSkuIds = [...new Set(masterLinks.map((l) => l.masterSkuId))]
+  const masterStockMap = await getAvailableStockBulk(masterSkuIds)
+  const productMasterStock = new Map<string, number>()
+  for (const link of masterLinks) {
+    if (link.productId) {
+      productMasterStock.set(link.productId, masterStockMap.get(link.masterSkuId) ?? 0)
+    }
+  }
+
+  const products = rawProducts.map((p) => {
+    const localStock = p.variants.length === 1 ? p.variants[0].stock : p.stock
+    return {
+      ...p,
+      basePrice: Number(p.basePrice),
+      compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : null,
+      costPrice: p.costPrice ? Number(p.costPrice) : null,
+      variants: p.variants.map((v) => ({ ...v, price: Number(v.price) })),
+      stock: productMasterStock.has(p.id) ? productMasterStock.get(p.id)! : localStock,
+      defaultVariantId: p.variants.length === 1 ? p.variants[0].id : null,
+      hasMultipleVariants: p.variants.length > 1,
+      hasVariantPricing: p.variants.length > 1 && new Set(p.variants.map((v) => v.price.toString())).size > 1,
+    }
+  })
+
+  // Filter to in-stock only if requested
+  const filteredProducts = params.inStock === "true"
+    ? products.filter((p) => (p.stock ?? 0) > 0)
+    : products
 
   // Wishlist IDs
   let wishlistIds: string[] = []
@@ -118,10 +145,12 @@ export default async function ProductsPage({ searchParams }: Props) {
         currentCategory={params.category}
         currentMinPrice={params.minPrice}
         currentMaxPrice={params.maxPrice}
+        currentOnSale={params.onSale}
+        currentInStock={params.inStock}
       />
 
       <ProductSearch
-        products={products}
+        products={filteredProducts}
         layout={productsLayout}
         cardStyle={cardStyle}
         wishlistEnabled={wishlistEnabled}

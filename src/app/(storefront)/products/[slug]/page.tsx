@@ -51,11 +51,12 @@ export default async function ProductPage({ params }: Props) {
 
   const [session, settings] = await Promise.all([
     auth(),
-    getSettings(["enable_wishlist", "enable_reviews"]),
+    getSettings(["enable_wishlist", "enable_reviews", "low_stock_threshold"]),
   ])
 
   const wishlistEnabled = settings.enable_wishlist !== "false"
   const reviewsEnabled = settings.enable_reviews !== "false"
+  const lowStockThreshold = parseInt(settings.low_stock_threshold || "10", 10)
 
   const product = await prisma.product.findUnique({
     where: { slug, isActive: true },
@@ -113,11 +114,13 @@ export default async function ProductPage({ params }: Props) {
     const opts = v.options as { name: string; value: string }[]
     return opts.some((o) => o.name === "Pack")
   })
-  const totalStock = hasPackVariants
-    ? product.stock
-    : product.variants.length > 0
-      ? product.variants.reduce((sum, v) => sum + v.stock, 0)
-      : product.stock
+  const totalStock = masterStockOverrides
+    ? (masterStockOverrides["product"] ?? 0)
+    : hasPackVariants
+      ? product.stock
+      : product.variants.length > 0
+        ? product.variants.reduce((sum, v) => sum + v.stock, 0)
+        : product.stock
 
   // Wishlist check
   let isWishlisted = false
@@ -201,6 +204,12 @@ export default async function ProductPage({ params }: Props) {
               <WishlistButton productId={product.id} isWishlisted={isWishlisted} size="md" />
             )}
           </div>
+          {totalStock > 0 && totalStock < lowStockThreshold && (
+            <p className="mt-1 text-sm font-semibold text-red-600">Only {totalStock} left, order soon!</p>
+          )}
+          {totalStock <= 0 && (
+            <p className="mt-1 text-sm font-semibold text-red-600">Out of Stock</p>
+          )}
 
           <div className="mt-4">
             <PriceDisplay

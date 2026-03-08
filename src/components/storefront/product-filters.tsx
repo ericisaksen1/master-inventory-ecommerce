@@ -9,6 +9,7 @@ interface ProductFiltersProps {
   currentMinPrice?: string
   currentMaxPrice?: string
   currentOnSale?: string
+  currentInStock?: string
   basePath?: string
 }
 
@@ -18,6 +19,7 @@ export function ProductFilters({
   currentMinPrice,
   currentMaxPrice,
   currentOnSale,
+  currentInStock,
   basePath = "/products",
 }: ProductFiltersProps) {
   const router = useRouter()
@@ -26,8 +28,9 @@ export function ProductFilters({
   const [maxPrice, setMaxPrice] = useState(currentMaxPrice || "")
   const [category, setCategory] = useState(currentCategory || "")
   const [onSale, setOnSale] = useState(currentOnSale === "true")
+  const [inStock, setInStock] = useState(currentInStock === "true")
 
-  const hasFilters = currentCategory || currentMinPrice || currentMaxPrice || currentOnSale
+  const hasFilters = currentCategory || currentMinPrice || currentMaxPrice || currentOnSale || currentInStock
 
   function applyFilters() {
     const params = new URLSearchParams(searchParams.toString())
@@ -39,6 +42,8 @@ export function ProductFilters({
     else params.delete("category")
     if (onSale) params.set("onSale", "true")
     else params.delete("onSale")
+    if (inStock) params.set("inStock", "true")
+    else params.delete("inStock")
     router.push(`${basePath}?${params.toString()}`)
   }
 
@@ -48,10 +53,12 @@ export function ProductFilters({
     params.delete("maxPrice")
     params.delete("category")
     params.delete("onSale")
+    params.delete("inStock")
     setMinPrice("")
     setMaxPrice("")
     setCategory("")
     setOnSale(false)
+    setInStock(false)
     router.push(`${basePath}?${params.toString()}`)
   }
 
@@ -104,6 +111,15 @@ export function ProductFilters({
           className="h-4 w-4 rounded border-border accent-primary"
         />
         <span className="text-sm font-medium text-secondary">On Sale</span>
+      </label>
+      <label className="flex h-9 cursor-pointer items-center gap-2 self-end">
+        <input
+          type="checkbox"
+          checked={inStock}
+          onChange={(e) => setInStock(e.target.checked)}
+          className="h-4 w-4 rounded border-border accent-primary"
+        />
+        <span className="text-sm font-medium text-secondary">In Stock Only</span>
       </label>
       <button
         type="button"
