@@ -108,27 +108,28 @@ export async function GET(req: NextRequest) {
     if (order.notes) {
       xml += `    <InternalNotes>${escapeXml(order.notes)}</InternalNotes>\n`
     }
+    const shipName = `${addr.firstName || ""} ${addr.lastName || ""}`.trim() || customerName
     xml += `    <Customer>\n`
     xml += `      <CustomerCode>${escapeXml(customerEmail)}</CustomerCode>\n`
-    xml += `    </Customer>\n`
-    xml += `    <BillTo>\n`
-    xml += `      <Name>${escapeXml(customerName)}</Name>\n`
-    xml += `      <Email>${escapeXml(customerEmail)}</Email>\n`
-    xml += `    </BillTo>\n`
-    xml += `    <ShipTo>\n`
-    xml += `      <Name>${escapeXml(`${addr.firstName || ""} ${addr.lastName || ""}`.trim() || customerName)}</Name>\n`
-    xml += `      <Address1>${escapeXml(addr.line1 || addr.street1 || "")}</Address1>\n`
+    xml += `      <BillTo>\n`
+    xml += `        <Name>${escapeXml(customerName)}</Name>\n`
+    xml += `        <Email>${escapeXml(customerEmail)}</Email>\n`
+    xml += `      </BillTo>\n`
+    xml += `      <ShipTo>\n`
+    xml += `        <Name>${escapeXml(shipName)}</Name>\n`
+    xml += `        <Address1>${escapeXml(addr.line1 || addr.street1 || "")}</Address1>\n`
     if (addr.line2 || addr.street2) {
-      xml += `      <Address2>${escapeXml(addr.line2 || addr.street2 || "")}</Address2>\n`
+      xml += `        <Address2>${escapeXml(addr.line2 || addr.street2 || "")}</Address2>\n`
     }
-    xml += `      <City>${escapeXml(addr.city || "")}</City>\n`
-    xml += `      <State>${escapeXml(addr.state || "")}</State>\n`
-    xml += `      <PostalCode>${escapeXml(addr.postalCode || addr.zip || "")}</PostalCode>\n`
-    xml += `      <Country>${escapeXml(addr.country || "US")}</Country>\n`
+    xml += `        <City>${escapeXml(addr.city || "")}</City>\n`
+    xml += `        <State>${escapeXml(addr.state || "")}</State>\n`
+    xml += `        <PostalCode>${escapeXml(addr.postalCode || addr.zip || "")}</PostalCode>\n`
+    xml += `        <Country>${escapeXml(addr.country || "US")}</Country>\n`
     if (addr.phone) {
-      xml += `      <Phone>${escapeXml(addr.phone)}</Phone>\n`
+      xml += `        <Phone>${escapeXml(addr.phone)}</Phone>\n`
     }
-    xml += `    </ShipTo>\n`
+    xml += `      </ShipTo>\n`
+    xml += `    </Customer>\n`
     xml += `    <Items>\n`
     for (const item of order.items) {
       xml += `      <Item>\n`
