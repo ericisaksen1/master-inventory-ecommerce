@@ -16,12 +16,13 @@ async function verifyAuth(req: NextRequest): Promise<boolean> {
   const authKey = await getSetting("shipstation_auth_key")
   if (!authKey) return false
 
-  // ShipStation sends credentials via Basic Auth with the auth key as username
+  // ShipStation sends credentials via Basic Auth
+  // Accept auth key as either the username or password
   const authHeader = req.headers.get("authorization")
   if (authHeader?.startsWith("Basic ")) {
     const decoded = Buffer.from(authHeader.slice(6), "base64").toString()
-    const [username] = decoded.split(":")
-    if (username === authKey) return true
+    const [username, password] = decoded.split(":")
+    if (username === authKey || password === authKey) return true
   }
 
   // Also allow query param for flexibility
