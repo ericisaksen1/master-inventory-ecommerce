@@ -14,7 +14,7 @@ export async function verifyPasscode(
   }
 
   const storedPasscode = await getSetting("storefront_passcode_value")
-  if (passcode !== storedPasscode) {
+  if (passcode.toLowerCase() !== storedPasscode?.toLowerCase()) {
     return { error: "Invalid passcode" }
   }
 

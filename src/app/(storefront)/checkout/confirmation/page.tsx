@@ -121,11 +121,11 @@ export default async function ConfirmationPage({ searchParams }: Props) {
       </div>
 
 
-      {order.payment.status === "SUBMITTED" && (
-        <div className="mt-6 rounded-md bg-blue-50 p-4 text-center text-sm text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-          Payment submitted! We&apos;ll confirm it shortly and update your order status.
-        </div>
-      )}
+      <div className="mt-6 rounded-md bg-blue-50 p-4 text-center text-sm text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+        {order.payment.status === "SUBMITTED"
+          ? "Payment submitted! We'll confirm it shortly and update your order status."
+          : "Once payment is received, your order will be processed."}
+      </div>
 
       {/* Order Summary */}
       <div className="mt-8 rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
