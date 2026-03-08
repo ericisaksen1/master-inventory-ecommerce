@@ -149,7 +149,20 @@ export function contactMessageAdminTemplate(name: string, email: string, subject
   }
 }
 
-export function newOrderAdminTemplate(orderNumber: string, total: string, customerName: string, branding?: EmailBranding) {
+export function newOrderAdminTemplate(
+  orderNumber: string,
+  total: string,
+  customerName: string,
+  branding?: EmailBranding,
+  items?: { name: string; quantity: number; price: string }[]
+) {
+  const itemRows = items?.length
+    ? `<table style="width:100%;border-collapse:collapse;margin:16px 0">
+        <tr style="background:#f9f9f9"><th style="padding:8px 12px;text-align:left">Item</th><th style="padding:8px 12px;text-align:center">Qty</th><th style="padding:8px 12px;text-align:right">Price</th></tr>
+        ${items.map((item) => `<tr><td style="padding:8px 12px;border-bottom:1px solid #eee">${esc(item.name)}</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center">${item.quantity}</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right">${item.price}</td></tr>`).join("")}
+      </table>`
+    : ""
+
   return {
     subject: `New Order #${orderNumber}`,
     html: layout("New Order Received", `
@@ -159,6 +172,7 @@ export function newOrderAdminTemplate(orderNumber: string, total: string, custom
         <tr><td style="padding:8px 12px;background:#f9f9f9;font-weight:600">Customer</td><td style="padding:8px 12px">${esc(customerName)}</td></tr>
         <tr><td style="padding:8px 12px;background:#f9f9f9;font-weight:600">Total</td><td style="padding:8px 12px;font-weight:600">${total}</td></tr>
       </table>
+      ${itemRows}
     `, branding),
   }
 }

@@ -114,10 +114,15 @@ export async function notifyAdminOutOfStock(productName: string) {
   await sendEmail(adminEmail, subject, html)
 }
 
-export async function notifyAdminNewOrder(orderNumber: string, total: string, customerName: string) {
+export async function notifyAdminNewOrder(
+  orderNumber: string,
+  total: string,
+  customerName: string,
+  items?: { name: string; quantity: number; price: string }[]
+) {
   const { adminEmail, branding } = await getEmailPersonalization()
   if (!adminEmail) return
-  const { subject, html } = newOrderAdminTemplate(orderNumber, total, customerName, branding)
+  const { subject, html } = newOrderAdminTemplate(orderNumber, total, customerName, branding, items)
   await sendEmail(adminEmail, subject, html)
 }
 

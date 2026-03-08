@@ -354,23 +354,25 @@ export async function createOrder(formData: FormData) {
   })
 
   // Email notifications (fire-and-forget)
+  const emailItems = cart.items.map((item) => ({
+    name: item.product.name + (item.variant?.name ? ` — ${item.variant.name}` : ""),
+    quantity: item.quantity,
+    price: formatCurrency(
+      (item.variant ? Number(item.variant.price) : Number(item.product.basePrice)) * item.quantity
+    ),
+  }))
   void notifyAdminNewOrder(
     orderNumber,
     formatCurrency(Number(order.total)),
-    customerName
+    customerName,
+    emailItems
   )
   void notifyCustomerOrderPlaced(
     customerEmail,
     orderNumber,
     formatCurrency(Number(order.total)),
     paymentMethod,
-    cart.items.map((item) => ({
-      name: item.product.name + (item.variant?.name ? ` — ${item.variant.name}` : ""),
-      quantity: item.quantity,
-      price: formatCurrency(
-        (item.variant ? Number(item.variant.price) : Number(item.product.basePrice)) * item.quantity
-      ),
-    }))
+    emailItems
   )
 
   // Low stock & out-of-stock alerts

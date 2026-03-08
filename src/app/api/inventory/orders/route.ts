@@ -226,7 +226,12 @@ export async function POST(request: NextRequest) {
   void notifyAdminNewOrder(
     labRatsOrderNumber,
     formatCurrency(body.total),
-    `${customerName} (via ${auth.site.name})`
+    `${customerName} (via ${auth.site.name})`,
+    body.items.map((item: any) => ({
+      name: item.name + (item.variantName ? ` — ${item.variantName}` : ""),
+      quantity: item.quantity,
+      price: formatCurrency(item.total),
+    }))
   )
 
   // Low stock alerts
