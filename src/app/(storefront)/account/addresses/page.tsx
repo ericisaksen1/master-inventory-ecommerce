@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma"
 import { AddressManager } from "./address-manager"
 import Link from "next/link"
 
+export const dynamic = "force-dynamic"
+
 export const metadata = { title: "My Addresses" }
 
 export default async function AddressesPage() {

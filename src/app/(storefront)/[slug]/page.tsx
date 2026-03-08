@@ -5,6 +5,8 @@ import { PageComponents } from "@/components/storefront/page-components"
 import { SetAdminEdit } from "@/components/storefront/admin-toolbar"
 import type { Metadata } from "next"
 
+export const dynamic = "force-dynamic"
+
 interface Props {
   params: Promise<{ slug: string }>
   searchParams: Promise<{ sort?: string; minPrice?: string; maxPrice?: string; category?: string }>

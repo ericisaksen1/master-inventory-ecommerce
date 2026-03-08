@@ -9,6 +9,8 @@ import { SortSelect } from "@/components/storefront/sort-select"
 import type { ProductLayout } from "@/components/storefront/product-grid"
 import type { ProductCardStyle } from "@/components/storefront/product-card"
 
+export const dynamic = "force-dynamic"
+
 export const metadata = { title: "All Products" }
 
 interface Props {

@@ -6,6 +6,8 @@ import { formatCurrency } from "@/lib/utils"
 import { AddStackToCartButton } from "@/components/storefront/add-stack-to-cart-button"
 import type { Metadata } from "next"
 
+export const dynamic = "force-dynamic"
+
 interface Props {
   params: Promise<{ slug: string }>
 }

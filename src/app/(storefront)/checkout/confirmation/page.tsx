@@ -6,6 +6,8 @@ import { formatCurrency } from "@/lib/utils"
 import Link from "next/link"
 import { CopyOrderNumber } from "./copy-order-number"
 
+export const dynamic = "force-dynamic"
+
 export const metadata = { title: "Order Confirmation" }
 
 interface Props {

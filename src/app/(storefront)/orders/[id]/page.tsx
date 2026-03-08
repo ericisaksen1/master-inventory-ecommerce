@@ -5,6 +5,8 @@ import { formatCurrency } from "@/lib/utils"
 import { OrderStatusBadge } from "@/components/storefront/order-status-badge"
 import Link from "next/link"
 
+export const dynamic = "force-dynamic"
+
 export const metadata = { title: "Order Details" }
 
 interface Props {

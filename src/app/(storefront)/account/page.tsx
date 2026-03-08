@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma"
 import { AccountForms } from "./account-forms"
 import Link from "next/link"
 
+export const dynamic = "force-dynamic"
+
 export const metadata = { title: "My Account" }
 
 export default async function AccountPage() {

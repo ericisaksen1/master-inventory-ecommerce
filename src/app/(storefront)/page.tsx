@@ -2,6 +2,8 @@ import { getSettings } from "@/lib/settings"
 import { PageComponents } from "@/components/storefront/page-components"
 import { JsonLd } from "@/components/storefront/json-ld"
 
+export const dynamic = "force-dynamic"
+
 interface Props {
   searchParams: Promise<{ sort?: string; minPrice?: string; maxPrice?: string; category?: string }>
 }

@@ -14,6 +14,8 @@ import { ProductStacks } from "./product-stacks"
 import { JsonLd } from "@/components/storefront/json-ld"
 import type { Metadata } from "next"
 
+export const dynamic = "force-dynamic"
+
 interface Props {
   params: Promise<{ slug: string }>
 }

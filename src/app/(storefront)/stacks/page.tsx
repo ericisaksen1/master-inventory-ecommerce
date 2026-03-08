@@ -3,6 +3,8 @@ import { getAvailableStockBulk } from "@/lib/master-inventory"
 import { StackCard, type StackCardData } from "@/components/storefront/stack-card"
 import type { Metadata } from "next"
 
+export const dynamic = "force-dynamic"
+
 export const metadata: Metadata = {
   title: "Stacks",
   description: "Browse our curated product bundles.",

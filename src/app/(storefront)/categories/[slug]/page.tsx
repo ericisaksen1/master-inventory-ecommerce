@@ -9,6 +9,8 @@ import { SortSelect } from "@/components/storefront/sort-select"
 import type { ProductCardStyle } from "@/components/storefront/product-card"
 import type { Metadata } from "next"
 
+export const dynamic = "force-dynamic"
+
 interface Props {
   params: Promise<{ slug: string }>
   searchParams: Promise<{ sort?: string }>

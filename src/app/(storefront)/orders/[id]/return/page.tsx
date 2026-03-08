@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma"
 import { ReturnForm } from "./return-form"
 import Link from "next/link"
 
+export const dynamic = "force-dynamic"
+
 export const metadata = { title: "Request Return" }
 
 interface Props {

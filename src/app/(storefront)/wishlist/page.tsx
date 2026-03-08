@@ -9,6 +9,8 @@ import { WishlistButton } from "@/components/storefront/wishlist-button"
 import { GuestWishlist } from "./guest-wishlist"
 import type { Metadata } from "next"
 
+export const dynamic = "force-dynamic"
+
 export const metadata: Metadata = { title: "Wishlist" }
 
 export default async function WishlistPage() {

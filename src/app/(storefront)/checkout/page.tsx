@@ -6,6 +6,8 @@ import { getSettings } from "@/lib/settings"
 import { sanitizeHtml } from "@/lib/sanitize"
 import { CheckoutForm } from "./checkout-form"
 
+export const dynamic = "force-dynamic"
+
 export const metadata = { title: "Checkout" }
 
 export default async function CheckoutPage() {
