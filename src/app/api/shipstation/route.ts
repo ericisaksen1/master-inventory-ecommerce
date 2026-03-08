@@ -64,7 +64,7 @@ export async function GET(req: NextRequest) {
   const pageSize = 100
 
   const where: Record<string, unknown> = {
-    status: { in: ["PAYMENT_COMPLETE", "CANCELLED"] },
+    status: { in: ["AWAITING_PAYMENT", "PAYMENT_COMPLETE", "ORDER_COMPLETE", "CANCELLED"] },
   }
 
   if (startDate || endDate) {
@@ -100,7 +100,11 @@ export async function GET(req: NextRequest) {
     xml += `    <OrderID>${escapeXml(order.id)}</OrderID>\n`
     xml += `    <OrderNumber>${escapeXml(order.orderNumber)}</OrderNumber>\n`
     xml += `    <OrderDate>${formatDate(order.createdAt)}</OrderDate>\n`
-    xml += `    <OrderStatus>${order.status === "CANCELLED" ? "cancelled" : "paid"}</OrderStatus>\n`
+    const ssStatus =
+      order.status === "CANCELLED" ? "cancelled" :
+      order.status === "ORDER_COMPLETE" ? "shipped" :
+      order.status === "AWAITING_PAYMENT" ? "unpaid" : "paid"
+    xml += `    <OrderStatus>${ssStatus}</OrderStatus>\n`
     xml += `    <LastModified>${formatDate(order.updatedAt)}</LastModified>\n`
     xml += `    <OrderTotal>${Number(order.total).toFixed(2)}</OrderTotal>\n`
     xml += `    <TaxAmount>${Number(order.tax).toFixed(2)}</TaxAmount>\n`
