@@ -259,8 +259,10 @@ export async function createConnectedSite(formData: FormData): Promise<{ error?:
 
   const apiKey = randomBytes(32).toString("hex")
 
+  const apiUrl = (formData.get("apiUrl") as string)?.trim() || null
+
   await prisma.connectedSite.create({
-    data: { name, domain, apiKey },
+    data: { name, domain, apiKey, apiUrl },
   })
 
   revalidatePath("/admin/inventory/sites")
@@ -281,11 +283,14 @@ export async function updateConnectedSite(id: string, formData: FormData): Promi
   })
   if (existing) return { error: "A site with this domain already exists" }
 
+  const apiUrl = (formData.get("apiUrl") as string)?.trim() || null
+
   await prisma.connectedSite.update({
     where: { id },
     data: {
       name,
       domain,
+      apiUrl,
       isActive: formData.get("isActive") === "on",
     },
   })
@@ -312,6 +317,58 @@ export async function deleteConnectedSite(id: string): Promise<{ success: boolea
 
   revalidatePath("/admin/inventory/sites")
   return { success: true }
+}
+
+export async function checkSiteLinks(
+  siteId: string
+): Promise<{
+  linked: number
+  unlinked: string[]
+  error?: string
+}> {
+  await requireAdmin()
+
+  const site = await prisma.connectedSite.findUnique({ where: { id: siteId } })
+  if (!site) return { linked: 0, unlinked: [], error: "Site not found" }
+  if (!site.apiUrl) return { linked: 0, unlinked: [], error: "No API URL configured for this site. Edit the site and add the API URL." }
+
+  try {
+    const res = await fetch(`${site.apiUrl}/linked-skus`, {
+      headers: { Authorization: `Bearer ${site.apiKey}` },
+    })
+
+    if (!res.ok) {
+      const body = await res.text()
+      return { linked: 0, unlinked: [], error: `Site returned ${res.status}: ${body}` }
+    }
+
+    const data = await res.json() as {
+      count: number
+      products: { name: string; masterSku: string; isActive: boolean }[]
+    }
+
+    // Cross-reference against our master SKUs
+    const masterSkuStrings = data.products.map((p) => p.masterSku).filter(Boolean)
+    const matchedSkus = await prisma.masterSku.findMany({
+      where: { sku: { in: masterSkuStrings } },
+      select: { sku: true },
+    })
+    const matchedSet = new Set(matchedSkus.map((m) => m.sku))
+
+    const unlinked: string[] = []
+    let linked = 0
+    for (const product of data.products) {
+      if (matchedSet.has(product.masterSku!)) {
+        linked++
+      } else {
+        unlinked.push(`${product.name} (${product.masterSku})`)
+      }
+    }
+
+    return { linked, unlinked }
+  } catch (err) {
+    return { linked: 0, unlinked: [], error: `Failed to connect to site: ${(err as Error).message}` }
+  }
 }
 
 export async function regenerateSiteApiKey(siteId: string): Promise<{ apiKey?: string; error?: string }> {

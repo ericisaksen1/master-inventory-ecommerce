@@ -10,6 +10,7 @@ import {
   updateConnectedSite,
   deleteConnectedSite,
   regenerateSiteApiKey,
+  checkSiteLinks,
 } from "@/actions/inventory"
 
 interface SiteData {
@@ -17,6 +18,7 @@ interface SiteData {
   name: string
   domain: string
   apiKey: string
+  apiUrl: string
   isActive: boolean
   linkedProducts: number
   createdAt: string
@@ -59,6 +61,11 @@ function SiteCard({ site }: { site: SiteData }) {
   const [isPending, startTransition] = useTransition()
   const [showKey, setShowKey] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
+  const [linkResult, setLinkResult] = useState<{
+    linked: number
+    unlinked: string[]
+    error?: string
+  } | null>(null)
   const { toast } = useToast()
   const router = useRouter()
 
@@ -76,6 +83,17 @@ function SiteCard({ site }: { site: SiteData }) {
       } else {
         toast("API key regenerated!")
         router.refresh()
+      }
+    })
+  }
+
+  function handleCheckLinks() {
+    setLinkResult(null)
+    startTransition(async () => {
+      const result = await checkSiteLinks(site.id)
+      setLinkResult(result)
+      if (result.error) {
+        toast(result.error, "error")
       }
     })
   }
@@ -104,9 +122,9 @@ function SiteCard({ site }: { site: SiteData }) {
             </Badge>
           </div>
           <p className="mt-0.5 text-sm text-secondary">{site.domain}</p>
-          <p className="mt-1 text-xs text-secondary">
-            {site.linkedProducts} linked product{site.linkedProducts !== 1 ? "s" : ""}
-          </p>
+          {site.apiUrl && (
+            <p className="mt-0.5 text-xs text-secondary">API: {site.apiUrl}</p>
+          )}
         </div>
         <div className="flex gap-2">
           <button
@@ -147,6 +165,35 @@ function SiteCard({ site }: { site: SiteData }) {
           {showKey ? site.apiKey : site.apiKey.slice(0, 8) + "••••••••••••••••"}
         </p>
       </div>
+
+      {/* Check Links */}
+      <div className="mt-4 flex items-center gap-3">
+        <Button size="sm" variant="outline" onClick={handleCheckLinks} disabled={isPending}>
+          {isPending ? "Checking..." : "Check Links"}
+        </Button>
+        {linkResult && !linkResult.error && (
+          <span className="text-sm text-secondary">
+            <span className="font-medium text-foreground">{linkResult.linked}</span> linked
+            {linkResult.unlinked.length > 0 && (
+              <span className="text-amber-600"> / {linkResult.unlinked.length} unmatched</span>
+            )}
+          </span>
+        )}
+      </div>
+
+      {/* Unmatched SKUs detail */}
+      {linkResult && !linkResult.error && linkResult.unlinked.length > 0 && (
+        <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3">
+          <p className="text-xs font-medium text-amber-800">
+            Unmatched SKUs (no master SKU found on this site):
+          </p>
+          <ul className="mt-1 space-y-0.5">
+            {linkResult.unlinked.map((item) => (
+              <li key={item} className="text-xs text-amber-700">{item}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {isEditing && (
         <div className="mt-4 border-t border-border pt-4">
@@ -198,6 +245,16 @@ function AddSiteForm({ onDone }: { onDone: () => void }) {
             className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
+      </div>
+      <div>
+        <label className="mb-1 block text-xs font-medium">API URL (optional)</label>
+        <input
+          type="text"
+          name="apiUrl"
+          placeholder="e.g. https://enoch.com/api/inventory"
+          className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+        />
+        <p className="mt-0.5 text-xs text-secondary">Base URL for calling back to this site (used for link checking)</p>
       </div>
       <div className="flex gap-2">
         <Button size="sm" type="submit" disabled={isPending}>
@@ -252,6 +309,17 @@ function EditSiteForm({ site, onDone }: { site: SiteData; onDone: () => void }) 
             className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
+      </div>
+      <div>
+        <label className="mb-1 block text-xs font-medium">API URL</label>
+        <input
+          type="text"
+          name="apiUrl"
+          defaultValue={site.apiUrl}
+          placeholder="e.g. https://enoch.com/api/inventory"
+          className="h-8 w-full rounded-md border border-border bg-background px-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+        />
+        <p className="mt-0.5 text-xs text-secondary">Base URL for calling back to this site (used for link checking)</p>
       </div>
       <label className="flex items-center gap-1.5 text-xs">
         <input
