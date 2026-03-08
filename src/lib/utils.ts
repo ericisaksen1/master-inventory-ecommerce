@@ -23,11 +23,18 @@ export function slugify(text: string): string {
     .replace(/-+/g, "-")
 }
 
-export function generateOrderNumber(): string {
-  const date = new Date()
-  const dateStr = date.toISOString().slice(0, 10).replace(/-/g, "")
-  const random = crypto.randomBytes(4).toString("hex").toUpperCase()
-  return `ORD-${dateStr}-${random}`
+export async function generateOrderNumber(): Promise<string> {
+  const { prisma } = await import("@/lib/prisma")
+  const last = await prisma.order.findFirst({
+    orderBy: { createdAt: "desc" },
+    select: { orderNumber: true },
+  })
+  let next = 3000
+  if (last?.orderNumber) {
+    const num = parseInt(last.orderNumber, 10)
+    if (!isNaN(num)) next = num + 1
+  }
+  return String(next)
 }
 
 /** Extract pack size from variant options. Returns 1 for non-pack variants. */

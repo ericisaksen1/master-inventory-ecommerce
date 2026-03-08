@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
   )
 
   // 6. Create order in transaction
-  const labRatsOrderNumber = generateOrderNumber()
+  const labRatsOrderNumber = await generateOrderNumber()
   const shippingAddress = {
     firstName: body.shippingAddress.firstName,
     lastName: body.shippingAddress.lastName,

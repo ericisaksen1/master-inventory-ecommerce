@@ -115,7 +115,7 @@ export async function createOrder(formData: FormData) {
   const taxRate = parseFloat(taxRateStr) || 0
   const shippingCost = parseFloat(shippingRateStr) || 0
 
-  const orderNumber = generateOrderNumber()
+  const orderNumber = await generateOrderNumber()
 
   // Products linked to a MasterSku have stock managed at the master level — check/decrement MasterSku.stock instead
   const masterLinks = new Map<string, { masterSkuId: string; quantityMultiplier: number }>()
