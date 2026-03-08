@@ -131,7 +131,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
         <ToolbarButton
           onClick={() => {
             if (showSource) {
-              editor.commands.setContent(sourceCode, true)
+              editor.commands.setContent(sourceCode, { emitUpdate: true })
               onChange(sourceCode)
             } else {
               setSourceCode(editor.getHTML())
