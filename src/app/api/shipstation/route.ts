@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma"
 import { getSetting } from "@/lib/settings"
 import { notifyCustomerShipped } from "@/lib/email/notify"
 
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+
 function escapeXml(str: string): string {
   return str
     .replace(/&/g, "&amp;")
@@ -150,7 +153,10 @@ export async function GET(req: NextRequest) {
   xml += `</Orders>`
 
   return new NextResponse(xml, {
-    headers: { "Content-Type": "text/xml" },
+    headers: {
+      "Content-Type": "text/xml",
+      "Cache-Control": "no-store, no-cache, must-revalidate",
+    },
   })
 }
 
