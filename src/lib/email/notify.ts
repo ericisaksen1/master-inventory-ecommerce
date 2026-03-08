@@ -118,11 +118,12 @@ export async function notifyAdminNewOrder(
   orderNumber: string,
   total: string,
   customerName: string,
-  items?: { name: string; quantity: number; price: string }[]
+  items?: { name: string; quantity: number; price: string }[],
+  customerEmail?: string
 ) {
   const { adminEmail, branding } = await getEmailPersonalization()
   if (!adminEmail) return
-  const { subject, html } = newOrderAdminTemplate(orderNumber, total, customerName, branding, items)
+  const { subject, html } = newOrderAdminTemplate(orderNumber, total, customerName, branding, items, customerEmail)
   await sendEmail(adminEmail, subject, html)
 }
 

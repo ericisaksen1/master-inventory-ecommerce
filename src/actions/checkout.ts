@@ -365,7 +365,8 @@ export async function createOrder(formData: FormData) {
     orderNumber,
     formatCurrency(Number(order.total)),
     customerName,
-    emailItems
+    emailItems,
+    customerEmail
   )
   void notifyCustomerOrderPlaced(
     customerEmail,
