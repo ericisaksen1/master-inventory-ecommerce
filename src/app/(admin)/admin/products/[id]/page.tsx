@@ -58,6 +58,36 @@ export default async function AdminProductDetailPage({ params }: Props) {
       }
     : null
 
+  // Fetch global variant settings for badges
+  const variantSettings = await prisma.setting.findMany({
+    where: {
+      key: {
+        in: [
+          "variant_enabled_single",
+          "variant_enabled_3_pack",
+          "variant_enabled_5_pack",
+          "variant_enabled_10_pack",
+        ],
+      },
+    },
+  })
+  const globalVariantSettings: Record<string, boolean> = {
+    Single: true,
+    "3 Pack": true,
+    "5 Pack": true,
+    "10 Pack": true,
+  }
+  const settingToName: Record<string, string> = {
+    variant_enabled_single: "Single",
+    variant_enabled_3_pack: "3 Pack",
+    variant_enabled_5_pack: "5 Pack",
+    variant_enabled_10_pack: "10 Pack",
+  }
+  for (const s of variantSettings) {
+    const name = settingToName[s.key]
+    if (name) globalVariantSettings[name] = s.value !== "false"
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between">
@@ -125,6 +155,7 @@ export default async function AdminProductDetailPage({ params }: Props) {
               price: Number(v.price),
               compareAtPrice: v.compareAtPrice ? Number(v.compareAtPrice) : null,
             }))}
+            globalVariantSettings={globalVariantSettings}
           />
         </div>
       </div>

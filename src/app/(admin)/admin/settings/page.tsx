@@ -43,6 +43,11 @@ const SETTINGS_FORM_KEYS = [
   "ga4_measurement_id", "facebook_pixel_id", "tiktok_pixel_id",
   // Printful
   "enable_printful",
+  // Global variant toggles
+  "variant_enabled_single",
+  "variant_enabled_3_pack",
+  "variant_enabled_5_pack",
+  "variant_enabled_10_pack",
 ]
 
 // Sensitive keys only SUPER_ADMIN should see

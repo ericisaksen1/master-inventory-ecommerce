@@ -18,14 +18,16 @@ interface Variant {
   options: unknown
   printfulVariantId: string | null
   compareAtPrice: number | null
+  isActive: boolean
 }
 
 interface VariantManagerProps {
   productId: string
   variants: Variant[]
+  globalVariantSettings?: Record<string, boolean>
 }
 
-export function VariantManager({ productId, variants }: VariantManagerProps) {
+export function VariantManager({ productId, variants, globalVariantSettings }: VariantManagerProps) {
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -130,7 +132,35 @@ export function VariantManager({ productId, variants }: VariantManagerProps) {
               ) : (
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium">{v.name}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium">{v.name}</p>
+                      {globalVariantSettings && (() => {
+                        const globalEnabled = globalVariantSettings[v.name]
+                        if (globalEnabled === undefined) return null
+                        if (!globalEnabled && !v.isActive) {
+                          return (
+                            <span className="inline-flex items-center rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-700">
+                              Globally Disabled
+                            </span>
+                          )
+                        }
+                        if (!globalEnabled && v.isActive) {
+                          return (
+                            <span className="inline-flex items-center rounded bg-yellow-100 px-1.5 py-0.5 text-[10px] font-medium text-yellow-700">
+                              Override
+                            </span>
+                          )
+                        }
+                        if (globalEnabled && !v.isActive) {
+                          return (
+                            <span className="inline-flex items-center rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-600">
+                              Disabled
+                            </span>
+                          )
+                        }
+                        return null
+                      })()}
+                    </div>
                     <p className="text-xs text-secondary">
                       {formatCurrency(v.price)} &middot; Stock: {v.stock}
                       {v.unitsPerItem > 1 && ` · ${v.unitsPerItem} units/item`}

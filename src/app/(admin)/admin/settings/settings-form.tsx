@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Select } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/toast"
-import { updateSettings, sendTestEmail } from "@/actions/settings"
+import { updateSettings, sendTestEmail, toggleGlobalVariant } from "@/actions/settings"
 import { ImageUploadField } from "@/components/admin/image-upload-field"
 
 const RichTextEditor = lazy(() => import("@/components/admin/rich-text-editor").then(m => ({ default: m.RichTextEditor })))
@@ -15,7 +15,7 @@ interface SettingsFormProps {
   isSuperAdmin: boolean
 }
 
-type SettingsTab = "general" | "payment" | "shipping" | "email" | "tracking" | "legal" | "popup" | "bulk_order" | "printful"
+type SettingsTab = "general" | "payment" | "shipping" | "email" | "tracking" | "variants" | "legal" | "popup" | "bulk_order" | "printful"
 
 const tabs: { key: SettingsTab; label: string; superAdminOnly?: boolean }[] = [
   { key: "general", label: "General" },
@@ -23,6 +23,7 @@ const tabs: { key: SettingsTab; label: string; superAdminOnly?: boolean }[] = [
   { key: "shipping", label: "Shipping & Rates" },
   { key: "email", label: "Email" },
   { key: "tracking", label: "Tracking" },
+  { key: "variants", label: "Variants" },
   { key: "legal", label: "Legal", superAdminOnly: true },
   { key: "popup", label: "Entry Popup", superAdminOnly: true },
   { key: "bulk_order", label: "Bulk Ordering", superAdminOnly: true },
@@ -220,6 +221,14 @@ export function SettingsForm({ settings, isSuperAdmin }: SettingsFormProps) {
     agreeText: settings.entry_popup_agree_text_color || "",
     disagreeBg: settings.entry_popup_disagree_bg_color || "",
     disagreeText: settings.entry_popup_disagree_text_color || "",
+  })
+
+  // Global variant toggle state
+  const [variantToggles, setVariantToggles] = useState({
+    variant_enabled_single: settings.variant_enabled_single !== "false",
+    variant_enabled_3_pack: settings.variant_enabled_3_pack !== "false",
+    variant_enabled_5_pack: settings.variant_enabled_5_pack !== "false",
+    variant_enabled_10_pack: settings.variant_enabled_10_pack !== "false",
   })
 
   async function handleSubmit(formData: FormData) {
@@ -639,6 +648,59 @@ export function SettingsForm({ settings, isSuperAdmin }: SettingsFormProps) {
               defaultValue={settings.tiktok_pixel_id || ""}
               placeholder="XXXXXXXXXXXXX"
             />
+          </div>
+        </div>
+      </div>
+
+      {/* Global Variant Toggles */}
+      <div style={{ display: activeTab === "variants" ? undefined : "none" }}>
+        <div className="mt-6">
+          <h2 className="text-lg font-semibold">Global Variant Toggles</h2>
+          <p className="mt-1 text-sm text-gray-500">
+            Disable variant types across all products. When toggled off, all variants of that type will be hidden from the storefront. You can still override this on individual products.
+          </p>
+          <div className="mt-4 space-y-3">
+            {([
+              { key: "variant_enabled_single", label: "Single", desc: "Single item variants" },
+              { key: "variant_enabled_3_pack", label: "3 Pack", desc: "3 Pack variants" },
+              { key: "variant_enabled_5_pack", label: "5 Pack", desc: "5 Pack variants" },
+              { key: "variant_enabled_10_pack", label: "10 Pack", desc: "10 Pack variants" },
+            ] as const).map((item) => (
+              <label key={item.key} className="flex items-center justify-between rounded-lg border border-gray-200 p-4">
+                <div>
+                  <span className="text-sm font-medium text-gray-900">{item.label}</span>
+                  <p className="text-xs text-gray-500">{item.desc}</p>
+                </div>
+                <input type="hidden" name={`setting_${item.key}`} value={variantToggles[item.key] ? "true" : "false"} />
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={variantToggles[item.key]}
+                  onClick={() => {
+                    const newValue = !variantToggles[item.key]
+                    setVariantToggles(prev => ({ ...prev, [item.key]: newValue }))
+                    startTransition(async () => {
+                      const result = await toggleGlobalVariant(item.key, newValue)
+                      if (result.error) {
+                        toast(result.error, "error")
+                        setVariantToggles(prev => ({ ...prev, [item.key]: !newValue }))
+                      } else {
+                        toast(`${item.label} variants ${newValue ? "enabled" : "disabled"} globally`)
+                      }
+                    })
+                  }}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${
+                    variantToggles[item.key] ? "bg-black" : "bg-gray-200"
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow ring-0 transition-transform ${
+                      variantToggles[item.key] ? "translate-x-5" : "translate-x-0"
+                    }`}
+                  />
+                </button>
+              </label>
+            ))}
           </div>
         </div>
       </div>

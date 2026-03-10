@@ -157,6 +157,43 @@ export async function updateSettings(formData: FormData) {
   return { success: true }
 }
 
+// Mapping of setting keys to variant names for bulk updates
+const VARIANT_SETTING_MAP: Record<string, string> = {
+  variant_enabled_single: "Single",
+  variant_enabled_3_pack: "3 Pack",
+  variant_enabled_5_pack: "5 Pack",
+  variant_enabled_10_pack: "10 Pack",
+}
+
+export async function toggleGlobalVariant(settingKey: string, enabled: boolean) {
+  const session = await auth()
+  const role = session?.user?.role
+  if (role !== "ADMIN" && role !== "SUPER_ADMIN") {
+    return { error: "Unauthorized" }
+  }
+
+  const variantName = VARIANT_SETTING_MAP[settingKey]
+  if (!variantName) {
+    return { error: "Invalid variant setting key" }
+  }
+
+  // Save the setting
+  await prisma.setting.upsert({
+    where: { key: settingKey },
+    update: { value: enabled ? "true" : "false" },
+    create: { key: settingKey, value: enabled ? "true" : "false" },
+  })
+
+  // Bulk update all matching variants
+  await prisma.productVariant.updateMany({
+    where: { name: { equals: variantName } },
+    data: { isActive: enabled },
+  })
+
+  revalidatePath("/", "layout")
+  return { success: true }
+}
+
 export async function sendTestEmail(): Promise<{ success?: boolean; error?: string }> {
   const session = await auth()
   const role = session?.user?.role
