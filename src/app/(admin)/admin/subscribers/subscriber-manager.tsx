@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useMemo } from "react"
 import { useRouter } from "next/navigation"
-import { deleteSubscriber } from "@/actions/subscribers"
+import { deleteSubscriber, syncSubscribers } from "@/actions/subscribers"
 import { Badge } from "@/components/ui/badge"
 
 interface Subscriber {
@@ -24,6 +24,7 @@ const SOURCE_BADGE: Record<string, { label: string; variant: "default" | "purple
 
 export function SubscriberManager({ subscribers }: { subscribers: Subscriber[] }) {
   const [isPending, startTransition] = useTransition()
+  const [syncResult, setSyncResult] = useState<string | null>(null)
   const router = useRouter()
   const [filter, setFilter] = useState<SourceFilter>("all")
   const [search, setSearch] = useState("")
@@ -115,14 +116,39 @@ export function SubscriberManager({ subscribers }: { subscribers: Subscriber[] }
           className="rounded-lg border border-border bg-background px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-primary/20"
         />
 
-        {/* Export */}
-        <button
-          type="button"
-          onClick={handleExport}
-          className="ml-auto rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-secondary hover:bg-muted"
-        >
-          Export CSV
-        </button>
+        <div className="ml-auto flex items-center gap-2">
+          {syncResult && (
+            <span className="text-xs text-green-600">{syncResult}</span>
+          )}
+          {/* Sync */}
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() => {
+              setSyncResult(null)
+              startTransition(async () => {
+                const res = await syncSubscribers()
+                if (res.success) {
+                  setSyncResult(
+                    res.added ? `${res.added} subscriber${res.added !== 1 ? "s" : ""} added` : "All synced"
+                  )
+                  router.refresh()
+                }
+              })
+            }}
+            className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-secondary hover:bg-muted disabled:opacity-50"
+          >
+            {isPending ? "Syncing…" : "Sync"}
+          </button>
+          {/* Export */}
+          <button
+            type="button"
+            onClick={handleExport}
+            className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-secondary hover:bg-muted"
+          >
+            Export CSV
+          </button>
+        </div>
       </div>
 
       {/* Table */}
