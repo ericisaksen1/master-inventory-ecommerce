@@ -1,6 +1,6 @@
 import { sendEmail } from "./send"
 import { getSettings } from "@/lib/settings"
-import type { EmailBranding, TemplateCustomization } from "./templates"
+import type { EmailBranding, TemplateCustomization, EmailPaymentInstructions } from "./templates"
 import {
   newUserAdminTemplate,
   affiliateApplicationAdminTemplate,
@@ -146,7 +146,26 @@ export async function notifyCustomerOrderPlaced(
   const { branding, settings } = await getEmailPersonalization()
   const mergeVars = { orderNumber, storeName: branding.storeName || "", total }
   const customization = getTemplateCustomization(settings, "order_confirmation", branding, mergeVars)
-  const { subject, html } = orderConfirmationTemplate(orderNumber, total, paymentMethod, items, customization)
+
+  // Fetch payment instructions for the email
+  let paymentInstructions: EmailPaymentInstructions | undefined
+  try {
+    const { getPaymentProvider } = await import("@/lib/payments")
+    const provider = getPaymentProvider(paymentMethod as import("@prisma/client").PaymentMethod)
+    const instructions = await provider.getInstructions(orderNumber, total.replace(/[^0-9.]/g, ""))
+    paymentInstructions = {
+      displayName: instructions.displayName,
+      instructions: instructions.instructions,
+      address: instructions.address,
+      qrCodeUrl: instructions.qrCodeUrl,
+      payUrl: instructions.payUrl,
+      additionalFields: instructions.additionalFields,
+    }
+  } catch (err) {
+    console.error("[email] Failed to fetch payment instructions:", err)
+  }
+
+  const { subject, html } = orderConfirmationTemplate(orderNumber, total, paymentMethod, items, customization, paymentInstructions)
   await sendEmail(customerEmail, subject, html)
 }
 

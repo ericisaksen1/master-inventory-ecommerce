@@ -181,12 +181,22 @@ export function newOrderAdminTemplate(
 
 // ── Customer Templates ──
 
+export interface EmailPaymentInstructions {
+  displayName: string
+  instructions: string
+  address: string
+  qrCodeUrl?: string
+  payUrl?: string
+  additionalFields?: { label: string; value: string }[]
+}
+
 export function orderConfirmationTemplate(
   orderNumber: string,
   total: string,
   paymentMethod: string,
   items: { name: string; quantity: number; price: string }[],
-  customization: TemplateCustomization = {}
+  customization: TemplateCustomization = {},
+  paymentInstructions?: EmailPaymentInstructions
 ) {
   const { branding, subject, introText, outroText } = customization
 
@@ -196,6 +206,31 @@ export function orderConfirmationTemplate(
         `<tr><td style="padding:8px 12px;border-bottom:1px solid #eee">${esc(item.name)}</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center">${item.quantity}</td><td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right">${item.price}</td></tr>`
     )
     .join("")
+
+  let paymentSection = `
+      <p style="margin-top:24px">Payment method: <strong>${esc(paymentMethod)}</strong></p>
+      <p>You will receive payment instructions shortly. Once your payment is confirmed, we'll prepare your order for shipping.</p>`
+
+  if (paymentInstructions) {
+    const fields = paymentInstructions.additionalFields?.length
+      ? paymentInstructions.additionalFields
+          .map((f) => `<tr><td style="padding:8px 12px;background:#f9f9f9;font-weight:600;width:120px">${esc(f.label)}</td><td style="padding:8px 12px">${esc(f.value)}</td></tr>`)
+          .join("")
+      : ""
+
+    paymentSection = `
+      <div style="margin-top:24px;padding:20px;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb">
+        <h2 style="margin:0 0 8px;font-size:16px;color:#111">Payment Instructions — ${esc(paymentInstructions.displayName)}</h2>
+        <p style="margin:0 0 16px;color:#333">${esc(paymentInstructions.instructions)}</p>
+        <table style="width:100%;border-collapse:collapse">
+          <tr><td style="padding:8px 12px;background:#f9f9f9;font-weight:600;width:120px">Send to</td><td style="padding:8px 12px;font-family:monospace;word-break:break-all">${esc(paymentInstructions.address)}</td></tr>
+          ${fields}
+        </table>
+        ${paymentInstructions.qrCodeUrl ? `<p style="text-align:center;margin:16px 0 0"><img src="${esc(paymentInstructions.qrCodeUrl)}" alt="QR Code" style="max-width:180px;border-radius:8px" /></p>` : ""}
+        ${paymentInstructions.payUrl ? `<p style="text-align:center;margin:12px 0 0"><a href="${esc(paymentInstructions.payUrl)}" style="display:inline-block;padding:10px 24px;background:#111;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;font-size:14px">Pay Now</a></p>` : ""}
+      </div>
+      <p style="margin-top:12px;color:#666;font-size:13px">Once your payment is confirmed, we'll prepare your order for shipping.</p>`
+  }
 
   const defaultSubject = `Order Confirmation #${orderNumber}`
 
@@ -210,8 +245,7 @@ export function orderConfirmationTemplate(
         ${itemRows}
       </table>
       <p style="font-size:16px;font-weight:600;text-align:right">Total: ${total}</p>
-      <p style="margin-top:24px">Payment method: <strong>${esc(paymentMethod)}</strong></p>
-      <p>You will receive payment instructions shortly. Once your payment is confirmed, we'll prepare your order for shipping.</p>
+      ${paymentSection}
       ${wrapOutro(outroText)}
     `, branding),
   }

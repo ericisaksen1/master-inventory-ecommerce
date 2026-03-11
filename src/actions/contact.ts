@@ -31,11 +31,12 @@ export async function submitContactMessage(formData: FormData) {
   })
 
   // Add to subscriber list
+  const subscriberEmail = email.toLowerCase()
   void prisma.subscriber.upsert({
-    where: { email },
+    where: { email: subscriberEmail },
     update: {},
-    create: { email, source: "contact" },
-  })
+    create: { email: subscriberEmail, source: "contact" },
+  }).catch(() => {})
 
   // Fire-and-forget notifications
   notifyAdminContactMessage(name, email, subject, message)

@@ -339,11 +339,12 @@ export async function createOrder(formData: FormData) {
   const customerEmail = isGuest ? guestEmail! : session.user!.email!
 
   // Add to subscriber list
+  const subscriberEmail = customerEmail.trim().toLowerCase()
   void prisma.subscriber.upsert({
-    where: { email: customerEmail },
+    where: { email: subscriberEmail },
     update: {},
-    create: { email: customerEmail, source: "order" },
-  })
+    create: { email: subscriberEmail, source: "order" },
+  }).catch(() => {})
 
   // Admin notification (fire-and-forget)
   void createNotification({
